@@ -1,0 +1,90 @@
+local scroll_timer = vim.loop.new_timer()
+local cursorline
+local relativenumber
+local number
+local signcolumn
+local guicursor
+local lines_to_move = 0
+local lines_moved = 0
+
+local scroll_up = function(move_cursor)
+    return move_cursor and "k<C-y>" or "<C-y>"
+end
+
+local scroll_down = function(move_cursor)
+    return move_cursor and "j<C-e>" or "<C-e>"
+end
+
+-- Checks whether the window edge matches the edge of the buffer
+local at_buffer_edge = function(move_cursor)
+    buffer_lines = vim.api.nvim_buf_line_count(0)
+    cursor_line = vim.api.nvim_win_get_cursor(0)[1]
+    window_height = vim.api.nvim_win_get_height(0)
+    cursor_height = vim.fn.winline() -- 1 is the top of the window
+
+    lowest_line = cursor_line + window_height - cursor_height
+    at_top_edge = cursor_height == cursor_line
+    at_bottom_edge = lowest_line == buffer_lines
+    if at_top_edge then
+        return "top"
+    elseif at_bottom_edge and move_cursor then
+        return "bottom"
+    else
+        return false
+    end
+end
+
+Scroll = function(lines, move_cursor)
+    -- If still scrolling just modify the amount of lines to move
+    if lines_to_move ~= 0 then
+        lines_to_move = lines_to_move + lines
+        return
+    end
+    -- If at the top or bottom edges of the buffer don't scroll further
+    edge = at_buffer_edge(move_cursor)
+    -- print(edge)
+    if edge == "top" and lines > 0 then
+        return
+    elseif edge == "bottom" and lines < 0 then
+        return
+    end
+
+    lines_to_move = lines
+    -- Scroll the first line
+    if lines_to_move > 0 then
+        vim.api.nvim_input(scroll_up(move_cursor))
+        lines_moved = lines_moved + 1
+    else
+        vim.api.nvim_input(scroll_down(move_cursor))
+        lines_moved = lines_moved - 1
+    end
+
+    -- Callback function triggered by scroll_timer
+    local scroll_callback = function()
+        if lines_to_move == lines_moved or at_buffer_edge(move_cursor) then
+            lines_moved = 0
+            lines_to_move = 0
+            scroll_timer:stop()
+            -- restore_ui()
+        elseif lines_to_move < lines_moved then
+            lines_moved = lines_moved - 1
+            vim.api.nvim_input(scroll_down(move_cursor))
+        else
+            lines_moved = lines_moved + 1
+            vim.api.nvim_input(scroll_up(move_cursor))
+        end
+    end
+
+    time_step = move_cursor and 8 or 20
+    scroll_timer:start(time_step, time_step, vim.schedule_wrap(scroll_callback))
+
+end
+
+height_fraction = function(fraction)
+    return vim.fn.float2nr(vim.fn.round(fraction * vim.api.nvim_win_get_height(0)))
+end
+
+vim.api.nvim_set_keymap('n', '<C-u>', ':lua Scroll(vim.wo.scroll, true)<CR>', {silent=true})
+vim.api.nvim_set_keymap('n', '<C-d>', ':lua Scroll(-vim.wo.scroll, true)<CR>', {silent=true})
+vim.api.nvim_set_keymap('n', 'K', ':lua Scroll(height_fraction(0.10), false)<CR>', {silent=true})
+vim.api.nvim_set_keymap('n', 'J', ':lua Scroll(-height_fraction(0.10), false)<CR>', {silent=true})
