@@ -1,6 +1,6 @@
 local scroll_timer = vim.loop.new_timer()
-local lines_to_move = 0
-local lines_moved = 0
+local lines_to_scroll = 0
+local lines_scrolled = 0
 
 -- UI variables
 local guicursor
@@ -34,14 +34,14 @@ end
 
 -- Checks whether the window edge matches the edge of the buffer
 local at_buffer_edge = function(move_cursor)
-    buffer_lines = vim.api.nvim_buf_line_count(0)
-    cursor_line = vim.api.nvim_win_get_cursor(0)[1]
-    window_height = vim.api.nvim_win_get_height(0)
-    cursor_height = vim.fn.winline() -- 1 is the top of the window
+    local buffer_lines = vim.api.nvim_buf_line_count(0)
+    local cursor_line = vim.api.nvim_win_get_cursor(0)[1]
+    local window_height = vim.api.nvim_win_get_height(0)
+    local cursor_height = vim.fn.winline() -- 1 is the top of the window
 
-    lowest_line = cursor_line + window_height - cursor_height
-    at_top_edge = cursor_height == cursor_line
-    at_bottom_edge = lowest_line == buffer_lines
+    local lowest_line = cursor_line + window_height - cursor_height
+    local at_top_edge = cursor_height == cursor_line
+    local at_bottom_edge = lowest_line == buffer_lines
     if at_top_edge then
         return "top"
     elseif at_bottom_edge and move_cursor then
@@ -61,11 +61,11 @@ end
 -- Scrolling function
 -- lines: number of lines to scroll or fraction of window to scroll
 -- move_cursor: scroll and move the cursor in the same direction simultaneously 
-scroll = function(lines, move_cursor)
+local scroll = function(lines, move_cursor)
 
     -- If still scrolling just modify the amount of lines to move
-    if lines_to_move ~= 0 then
-        lines_to_move = lines_to_move + lines
+    if lines_to_scroll ~= 0 then
+        lines_to_scroll = lines_to_scroll + lines
         return
     end
 
@@ -79,31 +79,31 @@ scroll = function(lines, move_cursor)
 
     -- If lines is a a fraction of the window transform it to lines
     lines = vim.fn.abs(lines) < 1 and height_fraction(lines) or lines
-    -- Hide some UI elements and assign 
+    -- Hide some UI elements and assign the number of lines to scroll
     hide_ui()
-    lines_to_move = lines
+    lines_to_scroll = lines
 
     -- Scroll the first line
-    if lines_to_move > 0 then
+    if lines_to_scroll > 0 then
         vim.api.nvim_input(scroll_up(move_cursor))
-        lines_moved = lines_moved + 1
+        lines_scrolled = lines_scrolled + 1
     else
         vim.api.nvim_input(scroll_down(move_cursor))
-        lines_moved = lines_moved - 1
+        lines_scrolled = lines_scrolled - 1
     end
 
     -- Callback function triggered by scroll_timer
     local scroll_callback = function()
-        if lines_to_move == lines_moved or at_buffer_edge(move_cursor) then
-            lines_moved = 0
-            lines_to_move = 0
+        if lines_to_scroll == lines_scrolled or at_buffer_edge(move_cursor) then
+            lines_scrolled = 0
+            lines_to_scroll = 0
             scroll_timer:stop()
-            -- restore_ui()
-        elseif lines_to_move < lines_moved then
-            lines_moved = lines_moved - 1
+            restore_ui()
+        elseif lines_to_scroll < lines_scrolled then
+            lines_scrolled = lines_scrolled - 1
             vim.api.nvim_input(scroll_down(move_cursor))
         else
-            lines_moved = lines_moved + 1
+            lines_scrolled = lines_scrolled + 1
             vim.api.nvim_input(scroll_up(move_cursor))
         end
     end
@@ -113,7 +113,9 @@ scroll = function(lines, move_cursor)
 
 end
 
-vim.api.nvim_set_keymap('n', '<C-u>', ':lua scroll(vim.wo.scroll, true)<CR>', {silent=true})
-vim.api.nvim_set_keymap('n', '<C-d>', ':lua scroll(-vim.wo.scroll, true)<CR>', {silent=true})
+vim.api.nvim_set_keymap('n', '<C-u>', [[:lua require('neoscroll').scroll(vim.wo.scroll, true)<CR>]], {silent=true})
+vim.api.nvim_set_keymap('n', '<C-d>', [[:lua require('neoscroll').scroll(-vim.wo.scroll, true)<CR>]], {silent=true})
 -- vim.api.nvim_set_keymap('n', 'K', ':lua scroll(0.10, false)<CR>', {silent=true})
 -- vim.api.nvim_set_keymap('n', 'J', ':lua scroll(-0.10, false)<CR>', {silent=true})
+
+return {scroll = scroll}
