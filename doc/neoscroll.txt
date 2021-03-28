@@ -1,0 +1,53 @@
+*neoscroll.txt*  Smooth scrolling
+
+Author: Carles Rafols i Belles
+
+
+===============================================================================
+INTRODUCTION                                             *neoscroll-introduction*
+Can substitute scrolling commands like <C-d>, <C-u>, <C-f>, <C-b>, <C-y>,
+<C-e> to provide smooth scrolling
+
+
+===============================================================================
+FUNCTIONS                                                *neoscroll-introduction*
+
+neoscroll.scroll(lines, move_cursor, visual_mode)            *neoscroll.scroll()*
+    Scroll smoothly a number of lines or a fraction of the current window.
+        `lines`:
+            - If integer: number of lines to scroll.
+            - If float: number of "windows" to scroll (e.g. 0.1 = 10% of the
+              the current window's height.
+            - A positive number scrolls upwards. A negative number scrolls
+              downwards.
+         `move_cursor`: scroll and move the cursor simultaneously
+         `visual_mode`: set to true if mapping in visual mode
+
+Examples:
+>
+    " Scroll 10 lines downwards mimicking <C-d>)
+    lua require('neoscroll').scroll(-10, true)
+    " Scroll 'w:scroll' lines upwards (mimicking <C-u>)
+    lua require('neoscroll').scroll(vim.wo.scroll, true)
+    " Scroll 10% of the window height upwards
+    lua require('neoscroll').scroll(0.1, true)
+<
+
+===============================================================================
+OPTIONS                                                       *neoscroll-options*
+
+|g:neoscroll_no_mappings| (default 0)
+    Do not define any mappings.
+
+|g:neoscroll_hide_cursor_line| (default 0)
+    Turn off 'cursorline' and hide the cursor (if 'termguicolors' is set).
+
+|g:neoscroll_time_step_move_cursor| (default 8)
+    Time in milliseconds between one single line scroll and the next one when
+    moving the cursor and scrolling simultaneously.
+
+|g:neoscroll_time_step_no_move_cursor| (default 20)
+    Time in milliseconds between one single line scroll and the next one when
+    scrolling without moving the cursor.
+
+vim:tw=78:ts=4:et:ft=help:norl:
