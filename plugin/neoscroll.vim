@@ -1,3 +1,6 @@
+" Smooth scrolling plugin
+" Maintainer: https://github.com/karb94
+
 if exists('g:loaded_neoscroll') || !has('nvim-0.5.0')
     finish
 endif
