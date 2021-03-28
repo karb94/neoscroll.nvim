@@ -1,12 +1,14 @@
-if exists('g:neoscroll_loaded') || !has('nvim-0.5.0')
+if exists('g:loaded_neoscroll') || !has('nvim-0.5.0')
     finish
 endif
 
-let g:charblob_loaded = 1
+let g:neoscroll_no_mappings = get(g:, 'neoscroll_no_mappings', 0)
+let g:neoscroll_hide_cursor_line = get(g:, 'neoscroll_no_mappings', 0)
+let g:neoscroll_time_step_move_cursor = get(g:, 'neoscroll_time_step_move_cursor', 8)
+let g:neoscroll_time_step_no_move_cursor = get(g:, 'neoscroll_time_step_no_move_cursor', 20)
 
-if exists('g:neoscroll_loaded')
-    finish
+if !g:neoscroll_no_mappings
+    lua require('neoscroll').set_mappings()
 endif
 
-let g:neoscroll_times_step_move_cursor = get(g:, 'neoscroll_times_step_move_cursor', 8)
-let g:neoscroll_times_step_no_move_cursor = get(g:, 'neoscroll_times_step_no_move_cursor', 20)
+let g:loaded_neoscroll = 1
