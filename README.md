@@ -13,6 +13,6 @@ use 'karb94/neoscroll.nvim'
 * A single scrolling function that accepts either the number of lines or the percentage of the window to scroll.
 * Cursor is hidden while scrolling (optional) for a more pleasing scrolling experience.
 
-##Acknowledgements
+## Acknowledgements
 This plugin was inspired by [vim-smoothie](https://github.com/psliwka/vim-smoothie) and [neo-smooth-scroll.nvim](https://github.com/cossonleo/neo-smooth-scroll.nvim).
 Big thank you to their authors!
