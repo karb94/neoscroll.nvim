@@ -22,7 +22,6 @@ neoscroll.scroll(lines, move_cursor, visual_mode)            *neoscroll.scroll()
               number). A negative number scrolls upwards (mnemonic: decrease
               line number).
          `move_cursor`: scroll and move the cursor simultaneously
-         `visual_mode`: set to true if mapping in visual mode
 
 Examples:
 >
