@@ -6,7 +6,7 @@ if exists('g:loaded_neoscroll') || !has('nvim-0.5.0')
 endif
 
 let g:neoscroll_no_mappings = get(g:, 'neoscroll_no_mappings', 0)
-let g:neoscroll_hide_cursor_line = get(g:, 'neoscroll_hide_cursor_line', 0)
+let g:neoscroll_hide_cursor_line = get(g:, 'neoscroll_hide_cursor_line', 1)
 let g:neoscroll_time_step_move_cursor = get(g:, 'neoscroll_time_step_move_cursor', 8)
 let g:neoscroll_time_step_no_move_cursor = get(g:, 'neoscroll_time_step_no_move_cursor', 20)
 
