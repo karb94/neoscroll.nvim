@@ -76,14 +76,22 @@ local function at_buffer_edge(direction, move_cursor)
     local lines_above_cursor = vim.fn.winline() - 1
 
     if direction < 0 then
-        local folded_lines = get_folded_lines(cursor_line, -(lines_above_cursor+1))
-        return lines_above_cursor + 1 + folded_lines == cursor_line
+        if vim.g.neoscroll_cursor_scrolls_alone == 1 then
+            return cursor_line == 1
+        else
+            local folded_lines = get_folded_lines(cursor_line, -(lines_above_cursor+1))
+            return lines_above_cursor + 1 + folded_lines == cursor_line
+        end
     elseif direction > 0 and move_cursor then
         local lines_below_cursor = window_height - (lines_above_cursor + 1)
         local folded_lines = get_folded_lines(cursor_line, lines_below_cursor+1)
-        local lower_edge = cursor_line + folded_lines + lines_below_cursor == buffer_lines
         local no_more_lines = cursor_line + folded_lines == buffer_lines
-        return lower_edge or no_more_lines
+        if vim.g.neoscroll_stop_eof == 1 then
+            local bottom_line = cursor_line + folded_lines + lines_below_cursor
+            return bottom_line == buffer_lines or no_more_lines
+        else
+            return no_more_lines
+        end
     else
         return false
     end
@@ -91,8 +99,9 @@ end
 
 
 -- Transforms fraction of window to number of lines
-local function height_fraction(fraction)
-    return vim.fn.float2nr(vim.fn.round(fraction * vim.api.nvim_win_get_height(0)))
+local function get_lines_from_win_fraction(fraction)
+    height_fraction = fraction * vim.api.nvim_win_get_height(0)
+    return vim.fn.float2nr(vim.fn.round(height_fraction))
 end
 
 
@@ -102,7 +111,6 @@ neoscroll = {}
 -- Scrolling function
 -- lines: number of lines to scroll or fraction of window to scroll
 -- move_cursor: scroll and move the cursor in the same direction simultaneously 
--- visual_mode: set to true if mapping in visual mode
 neoscroll.scroll = function(lines, move_cursor)
     -- Restore selection if in visual mode
     if visual_mode then vim.cmd('normal gv') end
@@ -112,7 +120,7 @@ neoscroll.scroll = function(lines, move_cursor)
 
     -- If lines is a a fraction of the window transform it to lines
     is_float = math.floor(math.abs(lines)) ~= math.abs(lines)
-    if is_float then lines = height_fraction(lines) end
+    if is_float then lines = get_lines_from_win_fraction(lines) end
 
     -- If still scrolling just modify the amount of lines to scroll
     if scrolling then
@@ -148,8 +156,8 @@ neoscroll.scroll = function(lines, move_cursor)
             else
                 lines_scrolled = lines_scrolled - 1
                 vim.cmd(scroll_up(move_cursor))
-            end
         end
+    end
 
     -- Scroll the first line
     if lines_to_scroll < 0 then
