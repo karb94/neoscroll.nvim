@@ -1,5 +1,8 @@
 # Neoscroll: a simple smooth scrolling plugin written in lua
 
+https://user-images.githubusercontent.com/41967813/113148268-93727b80-9229-11eb-993b-f55ad2bec808.mp4
+
+
 ## Installation
 You will need neovim 5.0 for this plugin to work
 Install using your favorite plugin manager. If you use [Packer](https://github.com/wbthomason/packer.nvim):
