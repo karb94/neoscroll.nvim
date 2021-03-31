@@ -76,7 +76,7 @@ local function at_buffer_edge(direction, move_cursor)
     local lines_above_cursor = vim.fn.winline() - 1
 
     if direction < 0 then
-        if vim.g.neoscroll_cursor_scroll == 1 then
+        if vim.g.neoscroll_cursor_scrolls_alone == 1 then
             return cursor_line == 1
         else
             local folded_lines = get_folded_lines(cursor_line, -(lines_above_cursor+1))

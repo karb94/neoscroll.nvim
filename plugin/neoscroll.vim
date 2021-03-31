@@ -10,7 +10,7 @@ let g:neoscroll_hide_cursor = get(g:, 'neoscroll_hide_cursor', v:true)
 let g:neoscroll_time_step_move_cursor = get(g:, 'neoscroll_time_step_move_cursor', 8)
 let g:neoscroll_time_step_no_move_cursor = get(g:, 'neoscroll_time_step_no_move_cursor', 20)
 let g:neoscroll_stop_eof = get(g:, 'neoscroll_stop_eof', v:false)
-let g:neoscroll_cursor_scroll = get(g:, 'neoscroll_cursor_scroll', v:false)
+let g:neoscroll_cursor_scrolls_alone = get(g:, 'neoscroll_cursor_scrolls_alone', v:false)
 
 if !g:neoscroll_no_mappings
     lua require('neoscroll').set_mappings()
