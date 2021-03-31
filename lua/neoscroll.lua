@@ -76,15 +76,19 @@ local function at_buffer_edge(direction, move_cursor)
     local lines_above_cursor = vim.fn.winline() - 1
 
     if direction < 0 then
-        local folded_lines = get_folded_lines(cursor_line, -(lines_above_cursor+1))
-        return lines_above_cursor + 1 + folded_lines == cursor_line
+        if vim.g.neoscroll_cursor_scroll == 1 then
+            return cursor_line == 1
+        else
+            local folded_lines = get_folded_lines(cursor_line, -(lines_above_cursor+1))
+            return lines_above_cursor + 1 + folded_lines == cursor_line
+        end
     elseif direction > 0 and move_cursor then
         local lines_below_cursor = window_height - (lines_above_cursor + 1)
         local folded_lines = get_folded_lines(cursor_line, lines_below_cursor+1)
-        local lower_edge = cursor_line + folded_lines + lines_below_cursor == buffer_lines
         local no_more_lines = cursor_line + folded_lines == buffer_lines
         if vim.g.neoscroll_stop_eof == 1 then
-            return lower_edge or no_more_lines
+            local bottom_line = cursor_line + folded_lines + lines_below_cursor
+            return bottom_line == buffer_lines or no_more_lines
         else
             return no_more_lines
         end
@@ -95,8 +99,9 @@ end
 
 
 -- Transforms fraction of window to number of lines
-local function height_fraction(fraction)
-    return vim.fn.float2nr(vim.fn.round(fraction * vim.api.nvim_win_get_height(0)))
+local function get_lines_from_win_fraction(fraction)
+    height_fraction = fraction * vim.api.nvim_win_get_height(0)
+    return vim.fn.float2nr(vim.fn.round(height_fraction))
 end
 
 
@@ -115,7 +120,7 @@ neoscroll.scroll = function(lines, move_cursor)
 
     -- If lines is a a fraction of the window transform it to lines
     is_float = math.floor(math.abs(lines)) ~= math.abs(lines)
-    if is_float then lines = height_fraction(lines) end
+    if is_float then lines = get_lines_from_win_fraction(lines) end
 
     -- If still scrolling just modify the amount of lines to scroll
     if scrolling then

@@ -56,6 +56,10 @@ OPTIONS                                                       *neoscroll-options
     When `move_cursor` is `true` scrolling downwards will stop when the bottom
     line of the window is the last line of the file.
 
+|g:neoscroll_cursor_scroll| (default: false)
+    When scrolling upwards the cursor will keep on scrolling until it reaches
+    the first line of the file even if the window cannot scroll further up.
+
 ===============================================================================
 DEFAULT MAPPINGS                                     *neoscroll-default-mappings*
 >
