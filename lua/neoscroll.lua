@@ -5,7 +5,6 @@ local lines_scrolled = 0
 local scrolling = false
 local guicursor
 vim.cmd('highlight NeoscrollHiddenCursor gui=reverse blend=100')
-vim.o.guicursor = vim.o.guicursor .. ',a:Cursor/lCursor'
 
 
 -- excecute commands to scroll screen [and cursor] up/down one line
@@ -25,7 +24,7 @@ end
 local function hide_cursor_line()
     if vim.o.termguicolors then
         guicursor = vim.o.guicursor
-        vim.o.guicursor = guicursor .. ',a:NeoscrollHiddenCursor/lCursor'
+        vim.o.guicursor = guicursor .. ',a:NeoscrollHiddenCursor'
     end
 end
 
@@ -123,7 +122,7 @@ neoscroll.scroll = function(lines, move_cursor)
     scrolling = true
 
     -- Hide cursor line 
-    if vim.g.neoscroll_hide_cursor_line == 1 and move_cursor then
+    if vim.g.neoscroll_hide_cursor == 1 and move_cursor then
         hide_cursor_line()
     end
 
@@ -136,7 +135,7 @@ neoscroll.scroll = function(lines, move_cursor)
         end_of_buffer = at_buffer_edge(scrolling_direction, move_cursor)
         finished_scrolling = scrolling_direction == 0 or end_of_buffer
         if finished_scrolling then
-            if vim.g.neoscroll_hide_cursor_line == 1 and move_cursor
+            if vim.g.neoscroll_hide_cursor == 1 and move_cursor
                 then restore_cursor_line()
             end
             lines_scrolled = 0

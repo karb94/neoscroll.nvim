@@ -39,7 +39,7 @@ OPTIONS                                                       *neoscroll-options
 |g:neoscroll_no_mappings| (default 0)
     Do not define any mappings.
 
-|g:neoscroll_hide_cursor_line| (default 1)
+|g:neoscroll_hide_cursor| (default 1)
     If 'termguicolors' is set hide the cursor while scrolling.
 
 |g:neoscroll_time_step_move_cursor| (default 8)
