@@ -12,7 +12,7 @@ Can substitute scrolling commands like <C-d>, <C-u>, <C-f>, <C-b>, <C-y>,
 ===============================================================================
 FUNCTIONS                                                *neoscroll-introduction*
 
-neoscroll.scroll(lines, move_cursor, visual_mode)            *neoscroll.scroll()*
+neoscroll.scroll(lines, move_cursor)                         *neoscroll.scroll()*
     Scroll smoothly a number of lines or a fraction of the current window.
         `lines`:
             - If integer: number of lines to scroll.
@@ -21,7 +21,9 @@ neoscroll.scroll(lines, move_cursor, visual_mode)            *neoscroll.scroll()
             - A positive number scrolls downwards (mnemonic: increase line
               number). A negative number scrolls upwards (mnemonic: decrease
               line number).
-         `move_cursor`: scroll and move the cursor simultaneously
+         `move_cursor`: scroll and move the cursor simultaneously. When `true`
+         scrolling downwards will stop when the cursor line is the last line
+         of the file unless |g:neoscroll_stop_eof| is set to `true`.
 
 Examples:
 >
@@ -36,23 +38,26 @@ Examples:
 ===============================================================================
 OPTIONS                                                       *neoscroll-options*
 
-|g:neoscroll_no_mappings| (default 0)
+|g:neoscroll_no_mappings| (default: false)
     Do not define any mappings.
 
-|g:neoscroll_hide_cursor| (default 1)
+|g:neoscroll_hide_cursor| (default: true)
     If 'termguicolors' is set hide the cursor while scrolling.
 
-|g:neoscroll_time_step_move_cursor| (default 8)
+|g:neoscroll_time_step_move_cursor| (default: 8)
     Time in milliseconds between one single line scroll and the next one when
     moving the cursor and scrolling simultaneously.
 
-|g:neoscroll_time_step_no_move_cursor| (default 20)
+|g:neoscroll_time_step_no_move_cursor| (default: 20)
     Time in milliseconds between one single line scroll and the next one when
     scrolling without moving the cursor.
+    ~
+|g:neoscroll_stop_eof| (default: false)
+    When `move_cursor` is `true` scrolling downwards will stop when the bottom
+    line of the window is the last line of the file.
 
 ===============================================================================
 DEFAULT MAPPINGS                                     *neoscroll-default-mappings*
-
 >
     nnoremap <silent> <C-u> :lua require('neoscroll').scroll(-vim.wo.scroll, true)<CR>
     nnoremap <silent> <C-d> :lua require('neoscroll').scroll(vim.wo.scroll, true)<CR>

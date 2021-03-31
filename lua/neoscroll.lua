@@ -83,7 +83,11 @@ local function at_buffer_edge(direction, move_cursor)
         local folded_lines = get_folded_lines(cursor_line, lines_below_cursor+1)
         local lower_edge = cursor_line + folded_lines + lines_below_cursor == buffer_lines
         local no_more_lines = cursor_line + folded_lines == buffer_lines
-        return lower_edge or no_more_lines
+        if vim.g.neoscroll_stop_eof == 1 then
+            return lower_edge or no_more_lines
+        else
+            return no_more_lines
+        end
     else
         return false
     end
@@ -102,7 +106,6 @@ neoscroll = {}
 -- Scrolling function
 -- lines: number of lines to scroll or fraction of window to scroll
 -- move_cursor: scroll and move the cursor in the same direction simultaneously 
--- visual_mode: set to true if mapping in visual mode
 neoscroll.scroll = function(lines, move_cursor)
     -- Restore selection if in visual mode
     if visual_mode then vim.cmd('normal gv') end
@@ -148,8 +151,8 @@ neoscroll.scroll = function(lines, move_cursor)
             else
                 lines_scrolled = lines_scrolled - 1
                 vim.cmd(scroll_up(move_cursor))
-            end
         end
+    end
 
     -- Scroll the first line
     if lines_to_scroll < 0 then
