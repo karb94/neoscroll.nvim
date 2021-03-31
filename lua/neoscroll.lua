@@ -11,11 +11,11 @@ vim.cmd('highlight NeoscrollHiddenCursor gui=reverse blend=100')
 -- `execute` is necessary to allow the use of special characters like <C-y>
 -- The bang (!) `normal!` in normal ignores mappings
 local function scroll_up(move_cursor)
-    local input_keys =  move_cursor and [[k\<C-y>]] or [[\<C-y>]]
+    local input_keys =  move_cursor and [[gk\<C-y>]] or [[\<C-y>]]
     return [[exec "normal! ]] .. input_keys .. [["]]
 end
 local function scroll_down(move_cursor)
-    local input_keys =  move_cursor and [[j\<C-e>]] or [[\<C-e>]]
+    local input_keys =  move_cursor and [[gj\<C-e>]] or [[\<C-e>]]
     return [[exec "normal! ]] .. input_keys .. [["]]
 end
 
