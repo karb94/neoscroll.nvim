@@ -76,7 +76,7 @@ local function at_buffer_edge(direction, move_cursor)
     local lines_above_cursor = vim.fn.winline() - 1
 
     if direction < 0 then
-        if vim.g.neoscroll_cursor_scrolls_alone == 1 then
+        if vim.g.neoscroll_cursor_scrolls_alone == true then
             return cursor_line == 1
         else
             local folded_lines = get_folded_lines(cursor_line, -(lines_above_cursor+1))
@@ -86,7 +86,7 @@ local function at_buffer_edge(direction, move_cursor)
         local lines_below_cursor = window_height - (lines_above_cursor + 1)
         local folded_lines = get_folded_lines(cursor_line, lines_below_cursor+1)
         local no_more_lines = cursor_line + folded_lines == buffer_lines
-        if vim.g.neoscroll_stop_eof == 1 then
+        if vim.g.neoscroll_stop_eof == true then
             local bottom_line = cursor_line + folded_lines + lines_below_cursor
             return bottom_line == buffer_lines or no_more_lines
         else
@@ -130,7 +130,7 @@ neoscroll.scroll = function(lines, move_cursor)
     scrolling = true
 
     -- Hide cursor line 
-    if vim.g.neoscroll_hide_cursor == 1 and move_cursor then
+    if vim.g.neoscroll_hide_cursor == true and move_cursor then
         hide_cursor_line()
     end
 
@@ -143,7 +143,7 @@ neoscroll.scroll = function(lines, move_cursor)
         end_of_buffer = at_buffer_edge(scrolling_direction, move_cursor)
         finished_scrolling = scrolling_direction == 0 or end_of_buffer
         if finished_scrolling then
-            if vim.g.neoscroll_hide_cursor == 1 and move_cursor
+            if vim.g.neoscroll_hide_cursor == true and move_cursor
                 then restore_cursor_line()
             end
             lines_scrolled = 0
