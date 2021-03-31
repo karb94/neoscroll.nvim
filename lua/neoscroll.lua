@@ -178,10 +178,10 @@ neoscroll.set_mappings = function()
     vim.api.nvim_set_keymap('n', '<C-f>', [[:lua neoscroll.scroll(vim.api.nvim_win_get_height(0), true)<CR>]], {silent=true})
     vim.api.nvim_set_keymap('x', '<C-b>', [[<cmd>lua neoscroll.scroll(-vim.api.nvim_win_get_height(0), true)<CR>]], {silent=true})
     vim.api.nvim_set_keymap('x', '<C-f>', [[<cmd>lua neoscroll.scroll(vim.api.nvim_win_get_height(0), true)<CR>]], {silent=true})
-    vim.api.nvim_set_keymap('n', 'K', [[:lua neoscroll.scroll(-0.10, false)<CR>]], {silent=true, noremap=true})
-    vim.api.nvim_set_keymap('n', 'J', [[:lua neoscroll.scroll(0.10, false)<CR>]], {silent=true, noremap=true})
-    vim.api.nvim_set_keymap('x', 'K', [[<cmd>lua neoscroll.scroll(-0.10, false)<CR>]], {silent=true, noremap=true})
-    vim.api.nvim_set_keymap('x', 'J', [[<cmd>lua neoscroll.scroll(0.10, false)<CR>]], {silent=true, noremap=true})
+    vim.api.nvim_set_keymap('n', '<C-y>', [[:lua neoscroll.scroll(-0.10, false)<CR>]], {silent=true, noremap=true})
+    vim.api.nvim_set_keymap('n', '<C-e>', [[:lua neoscroll.scroll(0.10, false)<CR>]], {silent=true, noremap=true})
+    vim.api.nvim_set_keymap('x', '<C-y>', [[<cmd>lua neoscroll.scroll(-0.10, false)<CR>]], {silent=true, noremap=true})
+    vim.api.nvim_set_keymap('x', '<C-e>', [[<cmd>lua neoscroll.scroll(0.10, false)<CR>]], {silent=true, noremap=true})
 end
 
 
