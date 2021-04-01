@@ -8,7 +8,7 @@
 
 
 ## Installation
-You will need neovim 5.0 for this plugin to work
+You will need neovim 0.5 for this plugin to work
 Install using your favorite plugin manager. If you use [Packer](https://github.com/wbthomason/packer.nvim):
 ```
 use 'karb94/neoscroll.nvim'
