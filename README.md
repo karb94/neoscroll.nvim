@@ -19,6 +19,7 @@ use 'karb94/neoscroll.nvim'
 * Takes into account folds.
 * A single scrolling function that accepts either the number of lines or the percentage of the window to scroll.
 * Cursor is hidden while scrolling (optional) for a more pleasing scrolling experience.
+* Customizable scrolling behaviour.
 
 ## Known issues
 * Scrolling might stop before reaching the top/bottom of the file when wrapped lines are present. Currently working on a solution.
