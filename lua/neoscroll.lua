@@ -199,6 +199,9 @@ neoscroll = {}
 -- move_cursor: scroll the window and the cursor simultaneously 
 -- time_step: time (in miliseconds) between one line scroll and the next one
 neoscroll.scroll = function(lines, move_cursor, time_step)
+    -- default time_step to 8ms
+    time_step = time_step or 8
+
     -- If lines is a fraction of the window transform it to lines
     if is_float(lines) then
         lines = get_lines_from_win_fraction(lines)
