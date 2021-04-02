@@ -4,24 +4,35 @@ local lines_to_scroll = 0
 local lines_scrolled = 0
 local scrolling = false
 local guicursor
+-- Highlight group to hide the cursor
 vim.cmd('highlight NeoscrollHiddenCursor gui=reverse blend=100')
+
+
+-- Helper function to check if a number is a float
+local function is_float(n)
+    return math.floor(math.abs(n)) ~= math.abs(n)
+end
 
 
 -- excecute commands to scroll screen [and cursor] up/down one line
 -- `execute` is necessary to allow the use of special characters like <C-y>
 -- The bang (!) `normal!` in normal ignores mappings
-local function scroll_up(move_cursor)
-    local input_keys =  move_cursor and [[gk\<C-y>]] or [[\<C-y>]]
-    return [[exec "normal! ]] .. input_keys .. [["]]
+local function scroll_up(scroll_window, scroll_cursor)
+    cursor_scroll_input = scroll_cursor and 'gk' or ''
+    window_scroll_input = scroll_window and [[\<C-y>]] or ''
+    scroll_input = cursor_scroll_input .. window_scroll_input
+    return [[exec "normal! ]] .. scroll_input .. [["]]
 end
-local function scroll_down(move_cursor)
-    local input_keys =  move_cursor and [[gj\<C-e>]] or [[\<C-e>]]
-    return [[exec "normal! ]] .. input_keys .. [["]]
+local function scroll_down(scroll_window, scroll_cursor)
+    cursor_scroll_input = scroll_cursor and 'gj' or ''
+    window_scroll_input = scroll_window and [[\<C-e>]] or ''
+    scroll_input = cursor_scroll_input .. window_scroll_input
+    return [[exec "normal! ]] .. scroll_input .. [["]]
 end
 
 
--- Hide cursor and cursor line during scrolling for a better visual effect
-local function hide_cursor_line()
+-- Hide cursor during scrolling for a better visual effect
+local function hide_cursor()
     if vim.o.termguicolors then
         guicursor = vim.o.guicursor
         vim.o.guicursor = guicursor .. ',a:NeoscrollHiddenCursor'
@@ -29,8 +40,8 @@ local function hide_cursor_line()
 end
 
 
--- Restore hidden cursor line during scrolling
-local function restore_cursor_line()
+-- Restore hidden cursor during scrolling
+local function restore_cursor()
     if vim.o.termguicolors then
         vim.o.guicursor = guicursor
     end
@@ -68,32 +79,65 @@ local function get_folded_lines(starting_line, window_lines)
 end
 
 
--- Checks whether the window edge matches the edge of the buffer
-local function at_buffer_edge(direction, move_cursor)
-    local buffer_lines = vim.api.nvim_buf_line_count(0)
-    local cursor_line = vim.api.nvim_win_get_cursor(0)[1]
-    local window_height = vim.api.nvim_win_get_height(0)
-    local lines_above_cursor = vim.fn.winline() - 1
-
+-- Collect all the necessary window, buffer and cursor data
+local function get_data(direction)
+    data = {}
+    data.buffer_lines = vim.api.nvim_buf_line_count(0)
+    data.cursor_line = vim.api.nvim_win_get_cursor(0)[1]
+    data.window_height = vim.api.nvim_win_get_height(0)
+    data.lines_above_cursor = vim.fn.winline() - 1
+    data.lines_below_cursor = data.window_height - (data.lines_above_cursor + 1)
     if direction < 0 then
-        if vim.g.neoscroll_cursor_scrolls_alone == true then
-            return cursor_line == 1
-        else
-            local folded_lines = get_folded_lines(cursor_line, -(lines_above_cursor+1))
-            return lines_above_cursor + 1 + folded_lines == cursor_line
-        end
-    elseif direction > 0 and move_cursor then
-        local lines_below_cursor = window_height - (lines_above_cursor + 1)
-        local folded_lines = get_folded_lines(cursor_line, lines_below_cursor+1)
-        local no_more_lines = cursor_line + folded_lines == buffer_lines
-        if vim.g.neoscroll_stop_eof == true then
-            local bottom_line = cursor_line + folded_lines + lines_below_cursor
-            return bottom_line == buffer_lines or no_more_lines
-        else
-            return no_more_lines
-        end
+        local window_lines = -(data.lines_above_cursor + 1)
+        data.folded_lines = get_folded_lines(data.cursor_line, window_lines)
+        data.win_top_line = data.cursor_line - data.lines_above_cursor - data.folded_lines
     else
-        return false
+        local window_lines = data.lines_below_cursor + 1
+        data.folded_lines = get_folded_lines(data.cursor_line, window_lines)
+        data.win_bottom_line = data.cursor_line + data.folded_lines + data.lines_below_cursor
+        data.last_line = data.buffer_lines - data.folded_lines
+    end
+    return data
+end
+
+
+-- Window rules for when to stop scrolling
+local function window_reached_limit(data, direction, move_cursor)
+    if direction < 0 then
+        return data.win_top_line == 1
+    else
+        if move_cursor then
+            if vim.g.neoscroll_stop_eof
+                and data.win_bottom_line == data.buffer_lines then
+                return true
+            end
+            if vim.g.neoscroll_respect_scrolloff then
+                return data.cursor_line == data.last_line - vim.wo.scrolloff
+            else
+                return data.cursor_line == data.last_line 
+            end
+        else
+            return data.cursor_line == data.last_line
+                and data.lines_above_cursor == 0
+        end
+    end
+end
+
+
+-- Cursor rules for when to stop scrolling
+local function cursor_reached_limit(data, direction)
+    if direction < 0 then
+        if vim.g.neoscroll_respect_scrolloff
+                and data.cursor_line == vim.wo.scrolloff then
+            return true
+        end
+        return data.cursor_line == 1
+    else
+        if vim.g.neoscroll_respect_scrolloff and
+                data.cursor_line == data.last_line - vim.wo.scrolloff
+            then return true
+        end
+        return data.cursor_line == data.last_line
     end
 end
 
@@ -105,33 +149,78 @@ local function get_lines_from_win_fraction(fraction)
 end
 
 
+-- Check if the window and the cursor can be scrolled further
+local function who_scrolls(direction, move_cursor)
+    local scroll_window, scroll_cursor, data
+    data = get_data(direction)
+    scroll_window = not window_reached_limit(data, direction, move_cursor)
+    if not move_cursor then
+        scroll_cursor = false
+    elseif scroll_window then
+        scroll_cursor = true
+    elseif vim.g.neoscroll_cursor_scrolls_alone then
+        scroll_cursor = not cursor_reached_limit(data, direction)
+    else
+        scroll_cursor = false
+    end
+    return scroll_window, scroll_cursor
+end
+
+
+-- Scroll one line in the given direction
+local function scroll_one_line(direction, scroll_window, scroll_cursor)
+    if direction > 0 then
+        lines_scrolled = lines_scrolled + 1
+        vim.cmd(scroll_down(scroll_window, scroll_cursor))
+    else
+        lines_scrolled = lines_scrolled - 1
+        vim.cmd(scroll_up(scroll_window, scroll_cursor))
+    end
+end
+
+
+-- Finish scrolling
+local function finish_scrolling(move_cursor)
+    if vim.g.neoscroll_hide_cursor == true and move_cursor then
+        restore_cursor()
+    end
+    lines_scrolled = 0
+    lines_to_scroll = 0
+    scroll_timer:stop()
+    scrolling = false
+end
+
+
 neoscroll = {}
 
 
 -- Scrolling function
 -- lines: number of lines to scroll or fraction of window to scroll
--- move_cursor: scroll and move the cursor in the same direction simultaneously 
-neoscroll.scroll = function(lines, move_cursor)
-    -- Restore selection if in visual mode
-    if visual_mode then vim.cmd('normal gv') end
-
-    -- If at the top or bottom edges of the buffer don't scroll further
-    if at_buffer_edge(lines, move_cursor) then return end
-
-    -- If lines is a a fraction of the window transform it to lines
-    is_float = math.floor(math.abs(lines)) ~= math.abs(lines)
-    if is_float then lines = get_lines_from_win_fraction(lines) end
-
+-- move_cursor: scroll the window and the cursor simultaneously 
+-- time_step: time (in miliseconds) between one line scroll and the next one
+neoscroll.scroll = function(lines, move_cursor, time_step)
+    -- If lines is a fraction of the window transform it to lines
+    if is_float(lines) then
+        lines = get_lines_from_win_fraction(lines)
+    end
     -- If still scrolling just modify the amount of lines to scroll
     if scrolling then
         lines_to_scroll = lines_to_scroll + lines
         return
     end
+
+    -- Check if the window and the cursor are allowed to scroll in that direction
+    local scroll_window, scroll_cursor = who_scrolls(lines, move_cursor)
+
+    -- If neither the window nor the cursor are allowed to scroll finish early
+    if not scroll_window and not scroll_cursor then return end
+
+    -- Start scrolling
     scrolling = true
 
-    -- Hide cursor line 
-    if vim.g.neoscroll_hide_cursor == true and move_cursor then
-        hide_cursor_line()
+    --Hide cursor line 
+    if vim.g.neoscroll_hide_cursor and move_cursor then
+        hide_cursor()
     end
 
     --assign the number of lines to scroll
@@ -139,57 +228,52 @@ neoscroll.scroll = function(lines, move_cursor)
 
     -- Callback function triggered by scroll_timer
     local function scroll_callback()
-        scrolling_direction = lines_to_scroll - lines_scrolled
-        end_of_buffer = at_buffer_edge(scrolling_direction, move_cursor)
-        finished_scrolling = scrolling_direction == 0 or end_of_buffer
-        if finished_scrolling then
-            if vim.g.neoscroll_hide_cursor == true and move_cursor
-                then restore_cursor_line()
-            end
-            lines_scrolled = 0
-            lines_to_scroll = 0
-            scroll_timer:stop()
-            scrolling = false
-            elseif scrolling_direction > 0 then
-                lines_scrolled = lines_scrolled + 1
-                vim.cmd(scroll_down(move_cursor))
+        direction = lines_to_scroll - lines_scrolled
+        if direction == 0 then
+            finish_scrolling(move_cursor)
+        else
+            scroll_window, scroll_cursor = who_scrolls(direction, move_cursor)
+            if not scroll_window and not scroll_cursor then
+                finish_scrolling(move_cursor)
             else
-                lines_scrolled = lines_scrolled - 1
-                vim.cmd(scroll_up(move_cursor))
+                scroll_one_line(direction, scroll_window, scroll_cursor)
+            end
         end
     end
 
     -- Scroll the first line
-    if lines_to_scroll < 0 then
-        vim.cmd(scroll_up(move_cursor))
-        lines_scrolled = lines_scrolled - 1
-    else
-        vim.cmd(scroll_down(move_cursor))
-        lines_scrolled = lines_scrolled + 1
-    end
+    scroll_one_line(lines, scroll_window, scroll_cursor)
 
-    time_step = move_cursor and vim.g.neoscroll_time_step_move_cursor
-        or vim.g.neoscroll_time_step_no_move_cursor
     -- Start timer to scroll the rest of the lines
     scroll_timer:start(time_step, time_step, vim.schedule_wrap(scroll_callback))
+end
 
+
+-- Helper function for mapping keys
+neoscroll.map = function(mode, keymap, lines, move_cursor, time_step)
+    prefix = mode == 'x' and '<cmd>lua ' or ':lua '
+    sufix = '<CR>'
+    args = lines .. ', ' .. move_cursor .. ', ' .. time_step
+    lua_cmd = 'neoscroll.scroll(' .. args .. ')'
+    cmd = prefix .. lua_cmd .. sufix
+    vim.api.nvim_set_keymap(mode, keymap, cmd, {silent=true})
 end
 
 
 -- Default mappings
 neoscroll.set_mappings = function()
-    vim.api.nvim_set_keymap('n', '<C-u>', [[:lua neoscroll.scroll(-vim.wo.scroll, true)<CR>]], {silent=true})
-    vim.api.nvim_set_keymap('n', '<C-d>', [[:lua neoscroll.scroll(vim.wo.scroll, true)<CR>]], {silent=true})
-    vim.api.nvim_set_keymap('x', '<C-u>', [[<cmd>lua neoscroll.scroll(-vim.wo.scroll, true)<CR>]], {silent=true})
-    vim.api.nvim_set_keymap('x', '<C-d>', [[<cmd>lua neoscroll.scroll(vim.wo.scroll, true)<CR>]], {silent=true})
-    vim.api.nvim_set_keymap('n', '<C-b>', [[:lua neoscroll.scroll(-vim.api.nvim_win_get_height(0), true)<CR>]], {silent=true})
-    vim.api.nvim_set_keymap('n', '<C-f>', [[:lua neoscroll.scroll(vim.api.nvim_win_get_height(0), true)<CR>]], {silent=true})
-    vim.api.nvim_set_keymap('x', '<C-b>', [[<cmd>lua neoscroll.scroll(-vim.api.nvim_win_get_height(0), true)<CR>]], {silent=true})
-    vim.api.nvim_set_keymap('x', '<C-f>', [[<cmd>lua neoscroll.scroll(vim.api.nvim_win_get_height(0), true)<CR>]], {silent=true})
-    vim.api.nvim_set_keymap('n', '<C-y>', [[:lua neoscroll.scroll(-0.10, false)<CR>]], {silent=true, noremap=true})
-    vim.api.nvim_set_keymap('n', '<C-e>', [[:lua neoscroll.scroll(0.10, false)<CR>]], {silent=true, noremap=true})
-    vim.api.nvim_set_keymap('x', '<C-y>', [[<cmd>lua neoscroll.scroll(-0.10, false)<CR>]], {silent=true, noremap=true})
-    vim.api.nvim_set_keymap('x', '<C-e>', [[<cmd>lua neoscroll.scroll(0.10, false)<CR>]], {silent=true, noremap=true})
+    neoscroll.map('n', '<C-u>', '-vim.wo.scroll', 'true', '8')
+    neoscroll.map('x', '<C-u>', '-vim.wo.scroll', 'true', '8')
+    neoscroll.map('n', '<C-d>',  'vim.wo.scroll', 'true', '8')
+    neoscroll.map('x', '<C-d>',  'vim.wo.scroll', 'true', '8')
+    neoscroll.map('n', '<C-b>', '-vim.api.nvim_win_get_height(0)', 'true', '7')
+    neoscroll.map('x', '<C-b>', '-vim.api.nvim_win_get_height(0)', 'true', '7')
+    neoscroll.map('n', '<C-f>',  'vim.api.nvim_win_get_height(0)', 'true', '7')
+    neoscroll.map('x', '<C-f>',  'vim.api.nvim_win_get_height(0)', 'true', '7')
+    neoscroll.map('n', '<C-y>', '-0.10', 'false', '20')
+    neoscroll.map('x', '<C-y>', '-0.10', 'false', '20')
+    neoscroll.map('n', '<C-e>',  '0.10', 'false', '20')
+    neoscroll.map('x', '<C-e>',  '0.10', 'false', '20')
 end
 
 
