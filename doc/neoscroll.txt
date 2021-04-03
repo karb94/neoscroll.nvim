@@ -40,6 +40,13 @@ Examples:
     " Scroll 10% of the window height upwards
     lua require('neoscroll').scroll(0.1, true, 20)
 <
+===============================================================================
+COMMANDS                                                     *neoscroll-commands*
+
+|NeoscrollEnablePM| / |NeoscrollDisablePM|
+    Enable/disable "Performance Mode" which disables Tree-sitter and regular
+    syntax highlighting while scrolling. Particularly useful for large files,
+    slow machines or heavy regex syntax highlighting.
 
 ===============================================================================
 OPTIONS                                                       *neoscroll-options*
