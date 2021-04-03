@@ -251,11 +251,11 @@ end
 
 -- Helper function for mapping keys
 neoscroll.map = function(mode, keymap, lines, move_cursor, time_step)
-    prefix = mode == 'x' and '<cmd>lua ' or ':lua '
-    sufix = '<CR>'
-    args = lines .. ', ' .. move_cursor .. ', ' .. time_step
-    lua_cmd = 'neoscroll.scroll(' .. args .. ')'
-    cmd = prefix .. lua_cmd .. sufix
+    local prefix = mode == 'x' and '<cmd>lua ' or ':lua '
+    local suffix = '<CR>'
+    local args = lines .. ', ' .. move_cursor .. ', ' .. time_step
+    local lua_cmd = 'neoscroll.scroll(' .. args .. ')'
+    local cmd = prefix .. lua_cmd .. suffix
     vim.api.nvim_set_keymap(mode, keymap, cmd, {silent=true})
 end
 
