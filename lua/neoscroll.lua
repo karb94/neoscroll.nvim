@@ -4,6 +4,7 @@ local lines_to_scroll = 0
 local lines_scrolled = 0
 local scrolling = false
 local guicursor
+local current_syntax
 -- Highlight group to hide the cursor
 vim.cmd('highlight NeoscrollHiddenCursor gui=reverse blend=100')
 
@@ -179,11 +180,39 @@ local function scroll_one_line(direction, scroll_window, scroll_cursor)
 end
 
 
--- Finish scrolling
+-- Scrolling constructor
+local function before_scrolling(lines, move_cursor)
+    -- Start scrolling
+    scrolling = true
+    -- Hide cursor line 
+    if vim.g.neoscroll_hide_cursor and move_cursor then
+        hide_cursor()
+    end
+    -- Performance mode
+    if vim.b.neoscroll_performance_mode and move_cursor then
+        if vim.g.loaded_nvim_treesitter then
+            vim.cmd('TSBufDisable highlight')
+        end
+        vim.bo.syntax = 'OFF'
+    end
+    -- Assign number of lines to scroll
+    lines_to_scroll = lines
+end
+
+
+-- Scrolling destructor
 local function finish_scrolling(move_cursor)
     if vim.g.neoscroll_hide_cursor == true and move_cursor then
         restore_cursor()
     end
+    --Performance mode
+    if vim.b.neoscroll_performance_mode and move_cursor then
+        vim.bo.syntax = 'ON'
+        if vim.g.loaded_nvim_treesitter then
+            vim.cmd('TSBufEnable highlight')
+        end
+    end
+
     lines_scrolled = 0
     lines_to_scroll = 0
     scroll_timer:stop()
@@ -208,23 +237,12 @@ neoscroll.scroll = function(lines, move_cursor, time_step)
         lines_to_scroll = lines_to_scroll + lines
         return
     end
-
     -- Check if the window and the cursor are allowed to scroll in that direction
     local scroll_window, scroll_cursor = who_scrolls(lines, move_cursor)
-
     -- If neither the window nor the cursor are allowed to scroll finish early
     if not scroll_window and not scroll_cursor then return end
-
-    -- Start scrolling
-    scrolling = true
-
-    --Hide cursor line 
-    if vim.g.neoscroll_hide_cursor and move_cursor then
-        hide_cursor()
-    end
-
-    --assign the number of lines to scroll
-    lines_to_scroll = lines
+    -- Preparation before scrolling starts
+    before_scrolling(lines, move_cursor)
 
     -- Callback function triggered by scroll_timer
     local function scroll_callback()
@@ -243,7 +261,6 @@ neoscroll.scroll = function(lines, move_cursor, time_step)
 
     -- Scroll the first line
     scroll_one_line(lines, scroll_window, scroll_cursor)
-
     -- Start timer to scroll the rest of the lines
     scroll_timer:start(time_step, time_step, vim.schedule_wrap(scroll_callback))
 end
@@ -275,6 +292,10 @@ neoscroll.set_mappings = function()
     neoscroll.map('n', '<C-e>',  '0.10', 'false', '20')
     neoscroll.map('x', '<C-e>',  '0.10', 'false', '20')
 end
+
+
+vim.cmd('command! NeoscrollEnablePM let b:neoscroll_performance_mode = v:true')
+vim.cmd('command! NeoscrollDisablePM let b:neoscroll_performance_mode = v:false')
 
 
 return neoscroll
