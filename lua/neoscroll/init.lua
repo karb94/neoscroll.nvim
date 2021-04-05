@@ -1,4 +1,3 @@
-local math = require('math')
 local opts = require('neoscroll.config').options
 local scroll_timer = vim.loop.new_timer()
 local lines_to_scroll = 0

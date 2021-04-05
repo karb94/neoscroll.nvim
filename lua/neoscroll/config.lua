@@ -1,4 +1,3 @@
-table = require('table')
 local config = {}
 
 config.options = {
