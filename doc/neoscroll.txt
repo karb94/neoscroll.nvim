@@ -110,8 +110,11 @@ The following mappings are valid for normal, visual and select mode:
      <C-d>    scroll( vim.wo.scroll, true, 8)
      <C-b>    scroll(-vim.api.nvim_win_get_height(0), true, 7)
      <C-f>    scroll( vim.api.nvim_win_get_height(0), true, 7)
-     <C-y>    scroll(-0.10, true, 20)
-     <C-e>    scroll( 0.10, true, 20)
+     <C-y>    scroll(-0.10, false, 20)
+     <C-e>    scroll( 0.10, false, 20)
+      zt      zt(7)
+      zz      zz(7)
+      zb      zb(7)
 
 ===============================================================================
 vim:tw=78:ts=4:et:ft=help:norl:
