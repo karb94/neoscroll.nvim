@@ -13,25 +13,20 @@
 * Performance mode that turns off syntax highlighting while scrolling for slower machines or files with heavy regex syntax highlighting.
 
 ## Installation
-You will need neovim 0.5 for this plugin to work. Install it using your favorite plugin manager.
+You will need neovim 0.5 for this plugin to work. Install it using your favorite plugin manager:
 
-With [Packer](https://github.com/wbthomason/packer.nvim):
-```Lua
-use 'karb94/neoscroll.nvim'
-```
-With [vim-plug](https://github.com/junegunn/vim-plug):
-```Vim
-Plug 'karb94/neoscroll.nvim'
-```
+- With [Packer](https://github.com/wbthomason/packer.nvim):`use 'karb94/neoscroll.nvim'`
+
+- With [vim-plug](https://github.com/junegunn/vim-plug): `Plug 'karb94/neoscroll.nvim'`
 
 ## Quickstart
-Add the following to your init file:
+Add the `setup()` function to your init file.
 
-init.lua
+For `init.lua`:
 ```Lua
 require('neoscroll').setup()
 ```
-init.vim
+For `init.vim`:
 ```Vim
 lua require('neoscroll').setup()
 ```
@@ -41,7 +36,8 @@ Setup function with the full list of options:
 ```Lua
 require('neoscroll').setup({
     -- All these keys will be mapped. Pass an empty table ({}) for no mappings
-    mappings = {'<C-u>', '<C-d>', '<C-b>', '<C-f>', '<C-y>', '<C-e>', 'zt', 'zz', 'zb'},
+    mappings = {'<C-u>', '<C-d>', '<C-b>', '<C-f>',
+                '<C-y>', '<C-e>', 'zt', 'zz', 'zb'},
     hide_cursor = true,          -- Hide cursor while scrolling
     stop_eof = true,             -- Stop at <EOF> when scrolling downwards
     respect_scrolloff = false,   -- Stop scrolling when the cursor reaches the scrolloff margin of the file
