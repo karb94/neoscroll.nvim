@@ -12,9 +12,32 @@ You can create your own scrolling commands using |neoscroll.scroll()|. You
 can customize the scrolling behaviour and the scrolling stop rules by changing
 the |neoscroll-options| as needed.
 
+===============================================================================
+QUICKSTART                                                 *neoscroll-quickstart*
+
+Add the `setup()` function in your init file:
+>
+    " In init.lua:
+    require('neoscroll').setup()
+    " In init.vim:
+    lua require('neoscroll').setup()
 
 ===============================================================================
 FUNCTIONS                                                   *neoscroll-functions*
+
+neoscroll.setup({opts})                                       *neoscroll-setup()*
+    Overwrites the default options with the options in the table `opts`,
+    defines the default mappings and creates the necessary commands.
+
+    Example with all the default options: >
+        require('neoscroll').setup({
+            no_mappings = false,         
+            hide_cursor = true,          
+            stop_eof = true,             
+            respect_scrolloff = false,   
+            cursor_scrolls_alone = true  
+        })
+<
 
 neoscroll.scroll(lines, move_cursor, time_step)              *neoscroll.scroll()*
     Scroll smoothly a number of lines or a fraction of the current window.
@@ -27,7 +50,7 @@ neoscroll.scroll(lines, move_cursor, time_step)              *neoscroll.scroll()
               line number).
          `move_cursor`: scroll and move the cursor simultaneously. When `true`
          scrolling downwards will stop when the cursor line is the last line
-         of the file unless |g:neoscroll_stop_eof| is set to `true`.
+         of the file unless |stop_eof| is set to `true`.
          `time_step`: Time (in milliseconds) between one single line scroll
          and the next one.
 
@@ -51,24 +74,23 @@ COMMANDS                                                     *neoscroll-commands
 ===============================================================================
 OPTIONS                                                       *neoscroll-options*
 
-|g:neoscroll_no_mappings| (default: `false`)
+|no_mappings| (default: `false`)
     Do not define any mappings.
 
-|g:neoscroll_hide_cursor| (default: `true`)
+|hide_cursor| (default: `true`)
     If 'termguicolors' is set hide the cursor while scrolling.
 
-|g:neoscroll_stop_eof| (default: `true`)
+|stop_eof| (default: `true`)
     When `move_cursor` is `true` scrolling downwards will stop when the bottom
     line of the window is the last line of the file.
 
 |g.neoscroll_respect_scrolloff| (default: `false`)
     The cursor stops at the scrolloff margin. Try combining this option with
-    either |g:neoscroll_stop_eof| or |g:neoscroll_cursor_scrolls_alone| (or
-    both).
+    either |stop_eof| or |cursor_scrolls_alone| (or both).
 
-|g:neoscroll_cursor_scrolls_alone| (default: `true`)
-    When scrolling upwards the cursor will keep on scrolling until it reaches
-    the first line of the file even if the window cannot scroll further up.
+|cursor_scrolls_alone| (default: `true`)
+    The cursor will keep on scrolling even if the window cannot scroll
+    further.
 
 ===============================================================================
 DEFAULT MAPPINGS                                     *neoscroll-default-mappings*

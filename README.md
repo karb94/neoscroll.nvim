@@ -1,18 +1,8 @@
 # Neoscroll: a simple smooth scrolling plugin written in lua
 
-
 ![demo](./.github/docs/demo.gif)
 
 [High quality video](https://user-images.githubusercontent.com/41967813/113148268-93727b80-9229-11eb-993b-f55ad2bec808.mp4)
-
-
-
-## Installation
-You will need neovim 0.5 for this plugin to work
-Install using your favorite plugin manager. If you use [Packer](https://github.com/wbthomason/packer.nvim):
-```
-use 'karb94/neoscroll.nvim'
-```
 
 ## Features
 * Smooth scrolling for window movement commands (optional): `<C-u>`, `<C-d>`, `<C-b>`, `<C-f>`, `<C-y>` and `<C-e>`.
@@ -22,8 +12,45 @@ use 'karb94/neoscroll.nvim'
 * Customizable scrolling behaviour.
 * Performance mode that turns off syntax highlighting while scrolling for slower machines or files with heavy regex syntax highlighting.
 
+## Installation
+You will need neovim 0.5 for this plugin to work. Install it using your favorite plugin manager.
+
+With [Packer](https://github.com/wbthomason/packer.nvim):
+```Lua
+use 'karb94/neoscroll.nvim'
+```
+With [vim-plug](https://github.com/junegunn/vim-plug):
+```Vim
+Plug 'karb94/neoscroll.nvim'
+```
+
+## Quickstart
+Add the following to your init file:
+
+init.lua
+```Lua
+require('neoscroll').setup()
+```
+init.vim
+```Vim
+lua require('neoscroll').setup()
+```
+
+## Options
+Setup function with the full list of options:
+```Lua
+require('neoscroll').setup({
+    no_mappings = false,         -- Do not define mappings
+    hide_cursor = true,          -- Hide cursor while scrolling
+    stop_eof = true,             -- Stop at <EOF> when scrolling downwards
+    respect_scrolloff = false,   -- Stop scrolling when the cursor reaches the scrolloff margin of the file
+    cursor_scrolls_alone = true  -- The cursor will keep on scrolling even if the window cannot scroll further
+})
+```
+
 ## Known issues
-* Scrolling might stop before reaching the top/bottom of the file when wrapped lines are present. Currently working on a solution.
+* Scrolling might stop before reaching the top/bottom of the file when wrapped lines are present.
+* `<C-u>`, `<C-d>`, `<C-b>`, `<C-f>` mess up macros.
 
 ## Acknowledgements
 This plugin was inspired by [vim-smoothie](https://github.com/psliwka/vim-smoothie) and [neo-smooth-scroll.nvim](https://github.com/cossonleo/neo-smooth-scroll.nvim).
