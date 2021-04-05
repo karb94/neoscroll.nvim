@@ -272,7 +272,10 @@ end
 -- Wrapper for zt
 function neoscroll.zt(time_step)
     local data = get_data()
-    local lines = data.lines_above_cursor - vim.wo.scrolloff
+    -- Temporary fix for garbage values in local scrolloff when not set
+    local scrolloff = vim.wo.scrolloff < data.window_height
+        and vim.wo.scrolloff or vim.o.scrolloff
+    local lines = data.lines_above_cursor - scrolloff
     if lines == 0 then return end
     neoscroll.scroll(lines, false, time_step)
 end
@@ -287,7 +290,10 @@ end
 -- Wrapper for zb
 function neoscroll.zb(time_step)
     local data = get_data()
-    local lines = -data.lines_below_cursor + vim.wo.scrolloff
+    -- Temporary fix for garbage values in local scrolloff when not set
+    local scrolloff = vim.wo.scrolloff < data.window_height
+        and vim.wo.scrolloff or vim.o.scrolloff
+    local lines = -data.lines_below_cursor + scrolloff
     if lines == 0 then return end
     neoscroll.scroll(lines, false, time_step)
 end
