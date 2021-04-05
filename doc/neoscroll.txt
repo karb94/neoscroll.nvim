@@ -65,7 +65,7 @@ Examples:
     lua require('neoscroll').scroll(0.1, true, 20)
 <
 
-neoscroll.{zt, zz, zb}                                       *neoscroll-zt-zz-zb*
+neoscroll.{zt,zz,zb}(time_step)                            *neoscroll-zt-zz-zb*
     `scroll()` wrapper functions to mimic |zt|, |zz| and |zb| scrolling
     commands.
 
