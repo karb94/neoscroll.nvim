@@ -31,7 +31,8 @@ neoscroll.setup({opts})                                       *neoscroll-setup()
 
     Example with all the default options: >
         require('neoscroll').setup({
-            no_mappings = false,         
+            mappings = {'<C-u>', '<C-d>', '<C-b>',
+                '<C-f>', '<C-y>', '<C-e>', 'zt', 'zz', 'zb'},
             hide_cursor = true,          
             stop_eof = true,             
             respect_scrolloff = false,   
@@ -79,8 +80,10 @@ COMMANDS                                                     *neoscroll-commands
 ===============================================================================
 OPTIONS                                                       *neoscroll-options*
 
-|no_mappings| (default: `false`)
-    Do not define any mappings.
+|mappings| (default: `{'<C-u>', '<C-d>', '<C-b>', '<C-f>',`
+                    `'<C-y>', '<C-e>', 'zt', 'zz', 'zb'}`)
+    All the keys defined in this option will be mapped to their corresponding
+    smooth-scroll function. To no map any key pass an empty table (`{}`)
 
 |hide_cursor| (default: `true`)
     If 'termguicolors' is set hide the cursor while scrolling.
