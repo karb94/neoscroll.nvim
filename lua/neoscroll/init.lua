@@ -88,16 +88,19 @@ local function get_data(direction)
     data.window_height = vim.api.nvim_win_get_height(0)
     data.lines_above_cursor = vim.fn.winline() - 1
     data.lines_below_cursor = data.window_height - (data.lines_above_cursor + 1)
-    if direction < 0 then
+
+    if direction == nil then return data
+    elseif direction < 0 then
         local window_lines = -(data.lines_above_cursor + 1)
         data.folded_lines = get_folded_lines(data.cursor_line, window_lines)
         data.win_top_line = data.cursor_line - data.lines_above_cursor - data.folded_lines
-    else
+    elseif direction > 0 then
         local window_lines = data.lines_below_cursor + 1
         data.folded_lines = get_folded_lines(data.cursor_line, window_lines)
         data.win_bottom_line = data.cursor_line + data.folded_lines + data.lines_below_cursor
         data.last_line = data.buffer_lines - data.folded_lines
     end
+
     return data
 end
 
@@ -263,6 +266,30 @@ function neoscroll.scroll(lines, move_cursor, time_step)
     scroll_one_line(lines, scroll_window, scroll_cursor)
     -- Start timer to scroll the rest of the lines
     scroll_timer:start(time_step, time_step, vim.schedule_wrap(scroll_callback))
+end
+
+
+-- Wrapper for zt
+function neoscroll.zt(time_step)
+    local data = get_data()
+    local lines = data.lines_above_cursor - vim.wo.scrolloff
+    if lines == 0 then return end
+    neoscroll.scroll(lines, false, time_step)
+end
+-- Wrapper for zz
+function neoscroll.zz(time_step)
+    local data = get_data()
+    local window_line = data.lines_above_cursor + 1
+    local lines = window_line - math.floor(data.window_height/2)
+    if lines == 0 then return end
+    neoscroll.scroll(lines, false, time_step)
+end
+-- Wrapper for zb
+function neoscroll.zb(time_step)
+    local data = get_data()
+    local lines = -data.lines_below_cursor + vim.wo.scrolloff
+    if lines == 0 then return end
+    neoscroll.scroll(lines, false, time_step)
 end
 
 
