@@ -15,7 +15,7 @@
 ## Installation
 You will need neovim 0.5 for this plugin to work. Install it using your favorite plugin manager:
 
-- With [Packer](https://github.com/wbthomason/packer.nvim):`use 'karb94/neoscroll.nvim'`
+- With [Packer](https://github.com/wbthomason/packer.nvim): `use 'karb94/neoscroll.nvim'`
 
 - With [vim-plug](https://github.com/junegunn/vim-plug): `Plug 'karb94/neoscroll.nvim'`
 
@@ -47,7 +47,7 @@ require('neoscroll').setup({
 
 ## Known issues
 * Scrolling might stop before reaching the top/bottom of the file when wrapped lines are present.
-* `<C-u>`, `<C-d>`, `<C-b>`, `<C-f>` mess up macros.
+* `<C-u>`, `<C-d>`, `<C-b>`, `<C-f>` mess up macros ([issue](https://github.com/karb94/neoscroll.nvim/issues/9)).
 
 ## Acknowledgements
 This plugin was inspired by [vim-smoothie](https://github.com/psliwka/vim-smoothie) and [neo-smooth-scroll.nvim](https://github.com/cossonleo/neo-smooth-scroll.nvim).
