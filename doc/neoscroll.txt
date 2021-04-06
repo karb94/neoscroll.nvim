@@ -92,7 +92,7 @@ OPTIONS                                                       *neoscroll-options
     When `move_cursor` is `true` scrolling downwards will stop when the bottom
     line of the window is the last line of the file.
 
-|g.neoscroll_respect_scrolloff| (default: `false`)
+|respect_scrolloff| (default: `false`)
     The cursor stops at the scrolloff margin. Try combining this option with
     either |stop_eof| or |cursor_scrolls_alone| (or both).
 
