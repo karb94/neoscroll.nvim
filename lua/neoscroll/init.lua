@@ -48,99 +48,82 @@ local function restore_cursor()
 end
 
 
--- Count number of folded lines
--- window_line_start < window_line_end
-local function get_folded_lines(starting_line, window_lines)
-    local line = starting_line
-    local window_line = 0
-    local folded_lines = 0
-    if window_lines < 0 then
-        repeat
-            local first_folded_line = vim.fn.foldclosed(line)
-            if first_folded_line ~= -1 then
-                folded_lines = folded_lines + line - first_folded_line
-                line = first_folded_line
-            end
-            line = line - 1
-            window_line = window_line - 1
-        until(window_line == window_lines - 1)
-    else
-        repeat
-            local last_folded_line = vim.fn.foldclosedend(line)
-            if last_folded_line ~= -1 then
-                folded_lines = folded_lines + last_folded_line - line
-                line = last_folded_line
-            end
-            line = line + 1
-            window_line = window_line + 1
-        until(window_line == window_lines + 1)
+local function get_lines_below_cursor()
+    local last_line = vim.fn.line("$")
+    local lines_below_cursor = 0
+    local line = vim.fn.line(".")
+    local last_folded_line = vim.fn.foldclosedend(line)
+    if last_folded_line ~= -1 then line = last_folded_line end
+    while(line < last_line) do
+        lines_below_cursor = lines_below_cursor + 1
+        line = line + 1
+        last_folded_line = vim.fn.foldclosedend(line)
+        if last_folded_line ~= -1 then line = last_folded_line end
     end
-    return folded_lines
+    return lines_below_cursor
 end
 
 
 -- Collect all the necessary window, buffer and cursor data
+-- vim.fn.line("w0") -> if there's a fold returns first line of fold
+-- vim.fn.line("w$") -> if there's a fold returns last line of fold
 local function get_data(direction)
     local data = {}
-    data.buffer_lines = vim.api.nvim_buf_line_count(0)
-    data.cursor_line = vim.api.nvim_win_get_cursor(0)[1]
-    data.window_height = vim.api.nvim_win_get_height(0)
-    data.lines_above_cursor = vim.fn.winline() - 1
-    data.lines_below_cursor = data.window_height - (data.lines_above_cursor + 1)
-
-    if direction == nil then return data
-    elseif direction < 0 then
-        local window_lines = -(data.lines_above_cursor + 1)
-        data.folded_lines = get_folded_lines(data.cursor_line, window_lines)
-        data.win_top_line = data.cursor_line - data.lines_above_cursor - data.folded_lines
+    -- If first line/last line not visible don't do anything else
+    if direction < 0 then
+        data.win_top_line = vim.fn.line("w0")
+        data.first_line_visible = data.win_top_line == 1
+        if not data.first_line_visible then
+            return data
+        end
     elseif direction > 0 then
-        local window_lines = data.lines_below_cursor + 1
-        data.folded_lines = get_folded_lines(data.cursor_line, window_lines)
-        data.win_bottom_line = data.cursor_line + data.folded_lines + data.lines_below_cursor
-        data.last_line = data.buffer_lines - data.folded_lines
+        data.win_bottom_line = vim.fn.line("w$")
+        data.last_line = vim.fn.line("$")
+        data.last_line_visible = data.win_bottom_line == data.last_line
+        if not data.last_line_visible then
+            return data
+        end
+        data.window_height = vim.api.nvim_win_get_height(0)
+        data.win_lines_below_cursor = data.window_height - vim.fn.winline()
+        data.lines_below_cursor = get_lines_below_cursor()
     end
-
+    data.lines_above_cursor = vim.fn.winline() - 1
     return data
 end
 
-
 -- Window rules for when to stop scrolling
-local function window_reached_limit(data, direction, move_cursor)
-    if direction < 0 then
-        return data.win_top_line == 1
-    else
+local function window_reached_limit(data, move_cursor)
+    if data.last_line_visible then
         if move_cursor then
-            if opts.stop_eof
-                and data.win_bottom_line == data.buffer_lines then
+            if opts.stop_eof and data.lines_below_cursor == data.win_lines_below_cursor then
                 return true
-            end
-            if opts.respect_scrolloff then
-                return data.cursor_line == data.last_line - vim.wo.scrolloff
+            elseif opts.respect_scrolloff
+                and data.lines_below_cursor <= vim.wo.scrolloff then
+                return true
             else
-                return data.cursor_line == data.last_line
+                return data.lines_below_cursor == 0
             end
         else
-            return data.cursor_line == data.last_line
-                and data.lines_above_cursor == 0
+            return data.lines_below_cursor == 0 and data.lines_above_cursor == 0
         end
     end
+    return data.first_line_visible
 end
 
 
 -- Cursor rules for when to stop scrolling
-local function cursor_reached_limit(data, direction)
-    if direction < 0 then
+local function cursor_reached_limit(data)
+    if data.first_line_visible then
         if opts.respect_scrolloff
-                and data.cursor_line == vim.wo.scrolloff then
+            and data.lines_above_cursor <= vim.wo.scrolloff then
             return true
         end
-        return data.cursor_line == 1
-    else
-        if opts.respect_scrolloff and
-                data.cursor_line == data.last_line - vim.wo.scrolloff
-            then return true
+        return data.lines_above_cursor == 0
+    elseif data.last_line_visible then
+        if opts.respect_scrolloff and data.lines_below_cursor <= vim.wo.scrolloff then
+            return true
         end
-        return data.cursor_line == data.last_line
+        return data.lines_below_cursor == 0
     end
 end
 
@@ -156,13 +139,13 @@ end
 local function who_scrolls(direction, move_cursor)
     local scroll_window, scroll_cursor, data
     data = get_data(direction)
-    scroll_window = not window_reached_limit(data, direction, move_cursor)
+    scroll_window = not window_reached_limit(data, move_cursor)
     if not move_cursor then
         scroll_cursor = false
     elseif scroll_window then
         scroll_cursor = true
     elseif opts.cursor_scrolls_alone then
-        scroll_cursor = not cursor_reached_limit(data, direction)
+        scroll_cursor = not cursor_reached_limit(data)
     else
         scroll_cursor = false
     end
@@ -270,29 +253,28 @@ end
 
 -- Wrapper for zt
 function neoscroll.zt(time_step)
-    local data = get_data()
+    local window_height = vim.api.nvim_win_get_height(0)
+    local lines_above_cursor = vim.fn.winline() - 1
     -- Temporary fix for garbage values in local scrolloff when not set
-    local scrolloff = vim.wo.scrolloff < data.window_height
-        and vim.wo.scrolloff or vim.o.scrolloff
-    local lines = data.lines_above_cursor - scrolloff
+    local scrolloff = vim.wo.scrolloff < window_height and vim.wo.scrolloff or vim.o.scrolloff
+    local lines = lines_above_cursor - scrolloff
     if lines == 0 then return end
     neoscroll.scroll(lines, false, time_step)
 end
 -- Wrapper for zz
 function neoscroll.zz(time_step)
-    local data = get_data()
-    local window_line = data.lines_above_cursor + 1
-    local lines = window_line - math.floor(data.window_height/2)
+    local window_height = vim.api.nvim_win_get_height(0)
+    local lines = vim.fn.winline() - math.floor(window_height/2)
     if lines == 0 then return end
     neoscroll.scroll(lines, false, time_step)
 end
 -- Wrapper for zb
 function neoscroll.zb(time_step)
-    local data = get_data()
+    local window_height = vim.api.nvim_win_get_height(0)
+    local lines_below_cursor = window_height - vim.fn.winline()
     -- Temporary fix for garbage values in local scrolloff when not set
-    local scrolloff = vim.wo.scrolloff < data.window_height
-        and vim.wo.scrolloff or vim.o.scrolloff
-    local lines = -data.lines_below_cursor + scrolloff
+    local scrolloff = vim.wo.scrolloff < window_height and vim.wo.scrolloff or vim.o.scrolloff
+    local lines = -lines_below_cursor + scrolloff
     if lines == 0 then return end
     neoscroll.scroll(lines, false, time_step)
 end
