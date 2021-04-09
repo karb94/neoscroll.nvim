@@ -21,22 +21,22 @@ end
 
 
 -- Table that maps keys to their corresponding function
-local key_to_function = {}
-key_to_function['<C-u>'] = {'scroll', {'-vim.wo.scroll', 'true', '8'                  }}
-key_to_function['<C-d>'] = {'scroll', { 'vim.wo.scroll', 'true', '8'                  }}
-key_to_function['<C-b>'] = {'scroll', {'-vim.api.nvim_win_get_height(0)', 'true', '7' }}
-key_to_function['<C-f>'] = {'scroll', { 'vim.api.nvim_win_get_height(0)', 'true', '7' }}
-key_to_function['<C-y>'] = {'scroll', {'-0.10', 'false', '20'                         }}
-key_to_function['<C-e>'] = {'scroll', { '0.10', 'false', '20'                         }}
-key_to_function['zt']    = {'zt',     {'7'                                            }}
-key_to_function['zz']    = {'zz',     {'7'                                            }}
-key_to_function['zb']    = {'zb',     {'7'                                            }}
+config.key_to_function = {}
+config.key_to_function['<C-u>'] = {'scroll', {'-vim.wo.scroll', 'true', '8'                  }}
+config.key_to_function['<C-d>'] = {'scroll', { 'vim.wo.scroll', 'true', '8'                  }}
+config.key_to_function['<C-b>'] = {'scroll', {'-vim.api.nvim_win_get_height(0)', 'true', '7' }}
+config.key_to_function['<C-f>'] = {'scroll', { 'vim.api.nvim_win_get_height(0)', 'true', '7' }}
+config.key_to_function['<C-y>'] = {'scroll', {'-0.10', 'false', '20'                         }}
+config.key_to_function['<C-e>'] = {'scroll', { '0.10', 'false', '20'                         }}
+config.key_to_function['zt']    = {'zt',     {'7'                                            }}
+config.key_to_function['zz']    = {'zz',     {'7'                                            }}
+config.key_to_function['zb']    = {'zb',     {'7'                                            }}
 
 
 -- Helper function for mapping keys
 function config.map(key)
-    local func = key_to_function[key][1]
-    local args = key_to_function[key][2]
+    local func = config.key_to_function[key][1]
+    local args = config.key_to_function[key][2]
     local args_str = table.concat(args, ', ')
     local prefix = [[lua require('neoscroll').]]
     local lua_cmd = prefix .. func .. '(' .. args_str .. ')'
@@ -49,7 +49,7 @@ end
 
 -- Default mappings
 function config.set_mappings()
-    for key, _ in pairs(key_to_function) do
+    for key, _ in pairs(config.key_to_function) do
         -- If key is in the mappings array map it
         for _, opt_key in ipairs(config.options.mappings) do
             if opt_key == key then
