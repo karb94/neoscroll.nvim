@@ -282,7 +282,7 @@ end
 
 function neoscroll.setup(custom_opts)
     require('neoscroll.config').set_options(custom_opts)
-    require('neoscroll.config').default_mappings()
+    require('neoscroll.config').set_mappings()
     vim.cmd('command! NeoscrollEnablePM let b:neoscroll_performance_mode = v:true')
     vim.cmd('command! NeoscrollDisablePM let b:neoscroll_performance_mode = v:false')
 end

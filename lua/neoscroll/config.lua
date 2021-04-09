@@ -48,7 +48,7 @@ end
 
 
 -- Default mappings
-function config.default_mappings()
+function config.set_mappings()
     for key, _ in pairs(key_to_function) do
         -- If key is in the mappings array map it
         for _, opt_key in ipairs(config.options.mappings) do
