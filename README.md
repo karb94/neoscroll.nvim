@@ -45,6 +45,30 @@ require('neoscroll').setup({
 })
 ```
 
+## Custom mappings
+Your mappings are too long and ugly? Too lazy to create your own mappings? Use the following syntactic sugar in your init.lua to define your own mappings in normal, visual and select modes:
+```Lua
+require('neoscroll').setup({
+    mappings = {}
+    -- Set any other options you want
+})
+
+local config = require('neoscroll.config')
+local t = config.key_to_function
+-- Syntax: t[keys] = {function, {function arguments}}
+t['<C-u>'] = {'scroll', {'-vim.wo.scroll', 'true', '8'}}
+t['<C-d>'] = {'scroll', { 'vim.wo.scroll', 'true', '8'}}
+t['<C-b>'] = {'scroll', {'-vim.api.nvim_win_get_height(0)', 'true', '7'}}
+t['<C-f>'] = {'scroll', { 'vim.api.nvim_win_get_height(0)', 'true', '7'}}
+t['<C-y>'] = {'scroll', {'-0.10', 'false', '20'}}
+t['<C-e>'] = {'scroll', { '0.10', 'false', '20'}}
+t['zt']    = {'zt', {'7'}}
+t['zz']    = {'zz', {'7'}}
+t['zb']    = {'zb', {'7'}}
+
+config.set_mappings()
+```
+
 ## Known issues
 * Scrolling might stop before reaching the top/bottom of the file when wrapped lines are present.
 * `<C-u>`, `<C-d>`, `<C-b>`, `<C-f>` mess up macros ([issue](https://github.com/karb94/neoscroll.nvim/issues/9)).
