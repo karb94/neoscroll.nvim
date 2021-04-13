@@ -35,7 +35,9 @@ end
 local function hide_cursor()
     if vim.o.termguicolors then
         guicursor = vim.o.guicursor
-        vim.o.guicursor = guicursor .. ',a:NeoscrollHiddenCursor'
+	if guicursor ~= '' then
+            vim.o.guicursor = guicursor .. ',a:NeoscrollHiddenCursor'
+	end
     end
 end
 
