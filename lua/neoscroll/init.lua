@@ -33,18 +33,16 @@ end
 
 -- Hide cursor during scrolling for a better visual effect
 local function hide_cursor()
-    if vim.o.termguicolors then
+    if vim.o.termguicolors and vim.o.guicursor ~= '' then
         guicursor = vim.o.guicursor
-	if guicursor ~= '' then
-            vim.o.guicursor = guicursor .. ',a:NeoscrollHiddenCursor'
-	end
+        vim.o.guicursor = 'a:NeoscrollHiddenCursor'
     end
 end
 
 
 -- Restore hidden cursor during scrolling
 local function restore_cursor()
-    if vim.o.termguicolors then
+    if vim.o.termguicolors and vim.o.guicursor ~= '' then
         vim.o.guicursor = guicursor
     end
 end
