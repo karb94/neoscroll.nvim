@@ -1,7 +1,5 @@
 # Neoscroll: a simple smooth scrolling plugin written in lua
 
-![demo](https://user-images.githubusercontent.com/41967813/113758483-d5109400-970b-11eb-83b9-0a844cba1d6b.gif)
-
 [High quality video](https://user-images.githubusercontent.com/41967813/113148268-93727b80-9229-11eb-993b-f55ad2bec808.mp4)
 
 ## Features
