@@ -5,7 +5,12 @@ local lines_scrolled = 0
 local scrolling = false
 local guicursor
 -- Highlight group to hide the cursor
-vim.cmd('highlight NeoscrollHiddenCursor gui=reverse blend=100')
+vim.api.nvim_exec([[
+augroup custom_highlight
+autocmd!
+autocmd ColorScheme * highlight NeoscrollHiddenCursor gui=reverse blend=100
+augroup END
+]], true)
 
 
 -- Helper function to check if a number is a float
