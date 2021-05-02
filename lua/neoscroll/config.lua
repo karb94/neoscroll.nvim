@@ -47,10 +47,10 @@ function config.map(key)
 end
 
 
--- Default mappings
+-- Set mappings
 function config.set_mappings()
     for key, _ in pairs(config.key_to_function) do
-        -- If key is in the mappings array map it
+        -- If key is in the mappings array, map it
         for _, opt_key in ipairs(config.options.mappings) do
             if opt_key == key then
                 config.map(key)

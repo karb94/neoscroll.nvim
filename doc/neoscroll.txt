@@ -45,7 +45,7 @@ neoscroll.scroll(lines, move_cursor, time_step)              *neoscroll.scroll()
         `lines`:
             - If integer: number of lines to scroll.
             - If float: number of "windows" to scroll (e.g. 0.1 = 10% of the
-              the current window's height.
+              current window's height.
             - A positive number scrolls downwards (mnemonic: increase line
               number). A negative number scrolls upwards (mnemonic: decrease
               line number).
@@ -55,6 +55,34 @@ neoscroll.scroll(lines, move_cursor, time_step)              *neoscroll.scroll()
          `time_step`: Time (in milliseconds) between one single line scroll
          and the next one.
 
+You can also use the same function with different arguments to add an easing
+function to the scrolling animation:
+
+neoscroll.scroll(lines, move_cursor, easing, time_step1, time_step2)
+    Scroll a number of lines or a fraction of the current window using an
+    easing function to smooth the start and the end of the scrolling
+    animation.
+        `lines`:
+            - If integer: number of lines to scroll.
+            - If float: number of "windows" to scroll (e.g. 0.1 = 10% of the
+              current window's height.
+            - A positive number scrolls downwards (mnemonic: increase line
+              number). A negative number scrolls upwards (mnemonic: decrease
+              line number).
+        `move_cursor`: scroll and move the cursor simultaneously. When `true`
+        scrolling downwards will stop when the cursor line is the last line
+        of the file unless |stop_eof| is set to `true`.
+        `easing`: easing `function(x)` to use for the scrolling animation. It
+        must take the relative scrolling position as an argument (a number
+        between 0 to 1) and return the relative time-step (a number between 0
+        and 1). For example:
+            `function(x) return math.pow(x, 2) end`
+        The relative time-step will then be mapped to the range [`time_step1`,
+        `time_step2`] to obtain the time-step at any given point of the
+        scrolling animation.
+        `time_step1`: initial time-step in the scrolling animation
+        `time_step2`: last time-step in the scrolling animation
+
 Examples:
 >
     " Scroll 10 lines upwards mimicking <C-d>
@@ -63,6 +91,9 @@ Examples:
     lua require('neoscroll').scroll(vim.wo.scroll, true, 8)
     " Scroll 10% of the window height upwards
     lua require('neoscroll').scroll(0.1, true, 20)
+    " Scroll 10 lines upwards using an easing function. The time-step will
+    " transition from 5 to 20 miliseconds following the given easing function
+    lua require('neoscroll').scroll(-10, true, function(x) return math.pow(x, 3) end, 5, 20)
 <
 
 neoscroll.{zt,zz,zb}(time_step)                            *neoscroll-zt-zz-zb*

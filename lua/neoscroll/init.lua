@@ -1,7 +1,7 @@
 local opts = require('neoscroll.config').options
 local scroll_timer = vim.loop.new_timer()
-local lines_to_scroll = 0
-local lines_scrolled = 0
+local target_line = 0
+local current_line = 0
 local scrolling = false
 local guicursor
 -- Highlight group to hide the cursor
@@ -72,16 +72,16 @@ end
 -- Collect all the necessary window, buffer and cursor data
 -- vim.fn.line("w0") -> if there's a fold returns first line of fold
 -- vim.fn.line("w$") -> if there's a fold returns last line of fold
-local function get_data(direction)
+local function get_data(lines_to_scroll)
     local data = {}
     -- If first line/last line not visible don't do anything else
-    if direction < 0 then
+    if lines_to_scroll < 0 then
         data.win_top_line = vim.fn.line("w0")
         data.first_line_visible = data.win_top_line == 1
         if not data.first_line_visible then
             return data
         end
-    elseif direction > 0 then
+    elseif lines_to_scroll > 0 then
         data.win_bottom_line = vim.fn.line("w$")
         data.last_line = vim.fn.line("$")
         data.last_line_visible = data.win_bottom_line == data.last_line
@@ -136,14 +136,14 @@ end
 -- Transforms fraction of window to number of lines
 local function get_lines_from_win_fraction(fraction)
     local height_fraction = fraction * vim.api.nvim_win_get_height(0)
-    return vim.fn.float2nr(vim.fn.round(height_fraction))
+    return math.floor(height_fraction + 0.5)
 end
 
 
 -- Check if the window and the cursor can be scrolled further
-local function who_scrolls(direction, move_cursor)
+local function who_scrolls(lines_to_scroll, move_cursor)
     local scroll_window, scroll_cursor, data
-    data = get_data(direction)
+    data = get_data(lines_to_scroll)
     scroll_window = not window_reached_limit(data, move_cursor)
     if not move_cursor then
         scroll_cursor = false
@@ -159,12 +159,12 @@ end
 
 
 -- Scroll one line in the given direction
-local function scroll_one_line(direction, scroll_window, scroll_cursor)
-    if direction > 0 then
-        lines_scrolled = lines_scrolled + 1
+local function scroll_one_line(lines_to_scroll, scroll_window, scroll_cursor)
+    if lines_to_scroll > 0 then
+        current_line = current_line + 1
         vim.cmd(scroll_down(scroll_window, scroll_cursor))
     else
-        lines_scrolled = lines_scrolled - 1
+        current_line = current_line - 1
         vim.cmd(scroll_up(scroll_window, scroll_cursor))
     end
 end
@@ -186,7 +186,7 @@ local function before_scrolling(lines, move_cursor)
         vim.bo.syntax = 'OFF'
     end
     -- Assign number of lines to scroll
-    lines_to_scroll = lines
+    target_line = lines
 end
 
 
@@ -203,10 +203,20 @@ local function finish_scrolling(move_cursor)
         end
     end
 
-    lines_scrolled = 0
-    lines_to_scroll = 0
+    current_line = 0
+    target_line = 0
     scroll_timer:stop()
     scrolling = false
+end
+
+
+local function compute_time_step(lines_to_scroll, lines, easing, time_step1, time_step2)
+    local lines_to_scroll_abs = math.abs(lines_to_scroll)
+    local lines_range = math.abs(lines)
+    if lines_to_scroll_abs >= lines_range then return time_step1 end
+    local x = (lines_range - lines_to_scroll_abs + 1) / lines_range
+    local fraction = easing(x)
+    return math.floor(time_step1 + (time_step2 - time_step1) * fraction + 0.5)
 end
 
 
@@ -217,14 +227,14 @@ local neoscroll = {}
 -- lines: number of lines to scroll or fraction of window to scroll
 -- move_cursor: scroll the window and the cursor simultaneously
 -- time_step: time (in miliseconds) between one line scroll and the next one
-function neoscroll.scroll(lines, move_cursor, time_step)
+function neoscroll.scroll(lines, move_cursor, easing, time_step1, time_step2)
     -- If lines is a fraction of the window transform it to lines
     if is_float(lines) then
         lines = get_lines_from_win_fraction(lines)
     end
     -- If still scrolling just modify the amount of lines to scroll
     if scrolling then
-        lines_to_scroll = lines_to_scroll + lines
+        target_line = target_line + lines
         return
     end
     -- Check if the window and the cursor are allowed to scroll in that direction
@@ -236,21 +246,35 @@ function neoscroll.scroll(lines, move_cursor, time_step)
 
     -- Callback function triggered by scroll_timer
     local function scroll_callback()
-        local direction = lines_to_scroll - lines_scrolled
-        if direction == 0 then
+        local lines_to_scroll = target_line - current_line
+        if lines_to_scroll == 0 then
             finish_scrolling(move_cursor)
-        else
-            scroll_window, scroll_cursor = who_scrolls(direction, move_cursor)
-            if not scroll_window and not scroll_cursor then
-                finish_scrolling(move_cursor)
-            else
-                scroll_one_line(direction, scroll_window, scroll_cursor)
-            end
+            return
         end
+
+        scroll_window, scroll_cursor = who_scrolls(lines_to_scroll, move_cursor)
+        if not scroll_window and not scroll_cursor then
+            finish_scrolling(move_cursor)
+            return
+        end
+
+        if type(easing) == "function" then
+            local timer_repeat = compute_time_step(lines_to_scroll, lines,
+                easing, time_step1, time_step2)
+            scroll_timer:set_repeat(timer_repeat)
+        end
+        scroll_one_line(lines_to_scroll, scroll_window, scroll_cursor)
     end
 
     -- Scroll the first line
     scroll_one_line(lines, scroll_window, scroll_cursor)
+    -- Set the (first) time-step
+    local time_step
+    if type(easing) == "function" then
+        time_step = time_step1
+    else
+        time_step = easing
+    end
     -- Start timer to scroll the rest of the lines
     scroll_timer:start(time_step, time_step, vim.schedule_wrap(scroll_callback))
 end
