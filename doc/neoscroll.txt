@@ -100,6 +100,14 @@ neoscroll.{zt,zz,zb}(time_step)                            *neoscroll-zt-zz-zb*
     `scroll()` wrapper functions to mimic |zt|, |zz| and |zb| scrolling
     commands.
 
+neoscroll.config.set_mappings()
+    Map all the keymaps in the |mappings| list with their corresponding
+    function defined in the `require('neoscroll.config').key_to_function`
+    table. You can use this function to set custom mappings by
+    modifying/adding keymaps-function pairs from the `key_to_function` table
+    before running this function. Bear in mind that if you add new keymaps
+    they will also need to be added to the |mappings| list.
+
 ===============================================================================
 COMMANDS                                                     *neoscroll-commands*
 
@@ -114,7 +122,9 @@ OPTIONS                                                       *neoscroll-options
 |mappings| (default: `{'<C-u>', '<C-d>', '<C-b>', '<C-f>',`
                     `'<C-y>', '<C-e>', 'zt', 'zz', 'zb'}`)
     All the keys defined in this option will be mapped to their corresponding
-    smooth-scroll function. To no map any key pass an empty table (`{}`)
+    smooth-scroll function as defined in the
+    `require('neoscroll.config').key_to_function` table. To no map any key
+    pass an empty table (`{}`)
 
 |hide_cursor| (default: `true`)
     If 'termguicolors' is set hide the cursor while scrolling.
