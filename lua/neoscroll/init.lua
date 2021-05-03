@@ -281,31 +281,31 @@ end
 
 
 -- Wrapper for zt
-function neoscroll.zt(time_step)
+function neoscroll.zt(easing, time_step1, time_step2)
     local window_height = vim.api.nvim_win_get_height(0)
     local lines_above_cursor = vim.fn.winline() - 1
     -- Temporary fix for garbage values in local scrolloff when not set
     local scrolloff = vim.wo.scrolloff < window_height and vim.wo.scrolloff or vim.o.scrolloff
     local lines = lines_above_cursor - scrolloff
     if lines == 0 then return end
-    neoscroll.scroll(lines, false, time_step)
+    neoscroll.scroll(lines, false, easing, time_step1, time_step2)
 end
 -- Wrapper for zz
-function neoscroll.zz(time_step)
+function neoscroll.zz(easing, time_step1, time_step2)
     local window_height = vim.api.nvim_win_get_height(0)
     local lines = vim.fn.winline() - math.floor(window_height/2)
     if lines == 0 then return end
-    neoscroll.scroll(lines, false, time_step)
+    neoscroll.scroll(lines, false, easing, time_step1, time_step2)
 end
 -- Wrapper for zb
-function neoscroll.zb(time_step)
+function neoscroll.zb(easing, time_step1, time_step2)
     local window_height = vim.api.nvim_win_get_height(0)
     local lines_below_cursor = window_height - vim.fn.winline()
     -- Temporary fix for garbage values in local scrolloff when not set
     local scrolloff = vim.wo.scrolloff < window_height and vim.wo.scrolloff or vim.o.scrolloff
     local lines = -lines_below_cursor + scrolloff
     if lines == 0 then return end
-    neoscroll.scroll(lines, false, time_step)
+    neoscroll.scroll(lines, false, easing, time_step1, time_step2)
 end
 
 
