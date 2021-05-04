@@ -1,4 +1,4 @@
-# Neoscroll: a simple smooth scrolling plugin written in lua
+# Neoscroll: a smooth scrolling neovim plugin written in lua
 
 [High quality video](https://user-images.githubusercontent.com/41967813/113148268-93727b80-9229-11eb-993b-f55ad2bec808.mp4)
 
