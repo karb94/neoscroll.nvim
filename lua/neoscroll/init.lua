@@ -211,6 +211,7 @@ end
 
 
 local function compute_time_step(lines_to_scroll, lines, easing, time_step1, time_step2)
+    print('Scrolling with easing function')
     local lines_to_scroll_abs = math.abs(lines_to_scroll)
     local lines_range = math.abs(lines)
     if lines_to_scroll_abs >= lines_range then return time_step1 end
@@ -227,7 +228,7 @@ local neoscroll = {}
 -- lines: number of lines to scroll or fraction of window to scroll
 -- move_cursor: scroll the window and the cursor simultaneously
 -- time_step: time (in miliseconds) between one line scroll and the next one
-function neoscroll.scroll(lines, move_cursor, easing, time_step1, time_step2)
+function neoscroll.scroll(lines, move_cursor, time_step1, time_step2, easing)
     -- If lines is a fraction of the window transform it to lines
     if is_float(lines) then
         lines = get_lines_from_win_fraction(lines)
@@ -258,9 +259,11 @@ function neoscroll.scroll(lines, move_cursor, easing, time_step1, time_step2)
             return
         end
 
-        if type(easing) == "function" then
+        if time_step2 ~= nil then
+            print('dfsd')
+            local ef = easing and easing or opts.easing_function
             local timer_repeat = compute_time_step(lines_to_scroll, lines,
-                easing, time_step1, time_step2)
+                ef, time_step1, time_step2)
             scroll_timer:set_repeat(timer_repeat)
         end
         scroll_one_line(lines_to_scroll, scroll_window, scroll_cursor)
@@ -268,44 +271,37 @@ function neoscroll.scroll(lines, move_cursor, easing, time_step1, time_step2)
 
     -- Scroll the first line
     scroll_one_line(lines, scroll_window, scroll_cursor)
-    -- Set the (first) time-step
-    local time_step
-    if type(easing) == "function" then
-        time_step = time_step1
-    else
-        time_step = easing
-    end
     -- Start timer to scroll the rest of the lines
-    scroll_timer:start(time_step, time_step, vim.schedule_wrap(scroll_callback))
+    scroll_timer:start(time_step1, time_step1, vim.schedule_wrap(scroll_callback))
 end
 
 
 -- Wrapper for zt
-function neoscroll.zt(easing, time_step1, time_step2)
+function neoscroll.zt(time_step1, time_step2, easing)
     local window_height = vim.api.nvim_win_get_height(0)
     local lines_above_cursor = vim.fn.winline() - 1
     -- Temporary fix for garbage values in local scrolloff when not set
     local scrolloff = vim.wo.scrolloff < window_height and vim.wo.scrolloff or vim.o.scrolloff
     local lines = lines_above_cursor - scrolloff
     if lines == 0 then return end
-    neoscroll.scroll(lines, false, easing, time_step1, time_step2)
+    neoscroll.scroll(lines, false, time_step1, time_step2, easing)
 end
 -- Wrapper for zz
-function neoscroll.zz(easing, time_step1, time_step2)
+function neoscroll.zz(time_step1, time_step2, easing)
     local window_height = vim.api.nvim_win_get_height(0)
     local lines = vim.fn.winline() - math.floor(window_height/2)
     if lines == 0 then return end
-    neoscroll.scroll(lines, false, easing, time_step1, time_step2)
+    neoscroll.scroll(lines, false, time_step1, time_step2, easing)
 end
 -- Wrapper for zb
-function neoscroll.zb(easing, time_step1, time_step2)
+function neoscroll.zb(time_step1, time_step2, easing)
     local window_height = vim.api.nvim_win_get_height(0)
     local lines_below_cursor = window_height - vim.fn.winline()
     -- Temporary fix for garbage values in local scrolloff when not set
     local scrolloff = vim.wo.scrolloff < window_height and vim.wo.scrolloff or vim.o.scrolloff
     local lines = -lines_below_cursor + scrolloff
     if lines == 0 then return end
-    neoscroll.scroll(lines, false, easing, time_step1, time_step2)
+    neoscroll.scroll(lines, false, time_step1, time_step2, easing)
 end
 
 

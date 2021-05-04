@@ -40,25 +40,8 @@ neoscroll.setup({opts})                                       *neoscroll-setup()
         })
 <
 
-neoscroll.scroll(lines, move_cursor, time_step)              *neoscroll.scroll()*
-    Scroll smoothly a number of lines or a fraction of the current window.
-        `lines`:
-            - If integer: number of lines to scroll.
-            - If float: number of "windows" to scroll (e.g. 0.1 = 10% of the
-              current window's height.
-            - A positive number scrolls downwards (mnemonic: increase line
-              number). A negative number scrolls upwards (mnemonic: decrease
-              line number).
-         `move_cursor`: scroll and move the cursor simultaneously. When `true`
-         scrolling downwards will stop when the cursor line is the last line
-         of the file unless |stop_eof| is set to `true`.
-         `time_step`: Time (in milliseconds) between one single line scroll
-         and the next one.
-
-You can also use the same function with different arguments to add an easing
-function to the scrolling animation:
-
-neoscroll.scroll(lines, move_cursor, easing, time_step1, time_step2)
+neoscroll.scroll(lines, move_cursor, easing,                 *neoscroll.scroll()*
+                 time_step1, time_step2)
     Scroll a number of lines or a fraction of the current window using an
     easing function to smooth the start and the end of the scrolling
     animation.
@@ -70,43 +53,45 @@ neoscroll.scroll(lines, move_cursor, easing, time_step1, time_step2)
               number). A negative number scrolls upwards (mnemonic: decrease
               line number).
         `move_cursor`: scroll and move the cursor simultaneously. When `true`
-        scrolling downwards will stop when the cursor line is the last line
-        of the file unless |stop_eof| is set to `true`.
+            scrolling downwards will stop when the cursor line is the last
+            line of the file unless |stop_eof| is set to `true`.
+        `time_step1`: If `time_step2` is not provided then it is the time (in
+            milliseconds) between each single line scroll. If `time_step2` is
+            provided then it is the initial time-step of the scrolling
+            animation.
+        `time_step2`: last time-step of the scrolling animation.
         `easing`: easing `function(x)` to use for the scrolling animation. It
-        must take the relative scrolling position as an argument (a number
-        between 0 to 1) and return the relative time-step (a number between 0
-        and 1). For example:
-            `function(x) return math.pow(x, 2) end`
-        The relative time-step will then be mapped to the range [`time_step1`,
-        `time_step2`] to obtain the time-step at any given point of the
-        scrolling animation.
-        `time_step1`: initial time-step in the scrolling animation
-        `time_step2`: last time-step in the scrolling animation
+            must take the relative scrolling position as an argument (a number
+            between 0 to 1) and return the relative time-step (a number
+            between 0 and 1). For example:
+                `function(x) return math.pow(x, 2) end`
+            The relative time-step will then be mapped to the range
+            [`time_step1`, `time_step2`] to obtain the time-step at any given
+            point of the scrolling animation. If no function is passed the
+            easing function defined in |easing_function| will be used.
 
-Examples:
->
-    " Scroll 10 lines upwards mimicking <C-d>
-    lua require('neoscroll').scroll(-10, true, 8)
-    " Scroll 'w:scroll' lines downwards (mimicking <C-u>
-    lua require('neoscroll').scroll(vim.wo.scroll, true, 8)
-    " Scroll 10% of the window height upwards
-    lua require('neoscroll').scroll(0.1, true, 20)
-    " Scroll 10 lines upwards using an easing function. The time-step will
-    " transition from 5 to 20 miliseconds following the given easing function
-    lua require('neoscroll').scroll(-10, true, function(x) return math.pow(x, 3) end, 5, 20)
+    Examples: >
+        " Scroll 10 lines upwards mimicking <C-d>
+        :lua require('neoscroll').scroll(-10, true, 8)
+        " Scroll 'w:scroll' lines downwards (mimicking <C-u>
+        :lua require('neoscroll').scroll(vim.wo.scroll, true, 8)
+        " Scroll 10% of the window height upwards
+        :lua require('neoscroll').scroll(0.1, true, 20)
+        " Scroll 10 lines upwards using an easing function. The time-step will
+        " transition from 5 to 20 miliseconds following the given easing function
+        :lua require('neoscroll').scroll(-10, true, 5, 20, function(x) return math.pow(x, 3) end)
 <
 
-neoscroll.{zt,zz,zb}(time_step)                            *neoscroll-zt-zz-zb*
+neoscroll.{zt,zz,zb}(time_step1, time_step2, easing)         *neoscroll-zt-zz-zb*
     `scroll()` wrapper functions to mimic |zt|, |zz| and |zb| scrolling
     commands.
 
-neoscroll.config.set_mappings()
-    Map all the keymaps in the |mappings| list with their corresponding
-    function defined in the `require('neoscroll.config').key_to_function`
-    table. You can use this function to set custom mappings by
-    modifying/adding keymaps-function pairs from the `key_to_function` table
-    before running this function. Bear in mind that if you add new keymaps
-    they will also need to be added to the |mappings| list.
+neoscroll.config.set_mappings(custom_mappings)
+    Map all the keymaps in the `custom_mappings` table in normal, visual and
+    select mode. `custom_mappings` must have the following form: >
+        t[keys] = {function, {function arguments}}
+<    If `custom_mappings` is not passed then the default mappings are loaded
+    only for the keys specified in the |mappings| option.
 
 ===============================================================================
 COMMANDS                                                     *neoscroll-commands*
@@ -141,10 +126,23 @@ OPTIONS                                                       *neoscroll-options
     The cursor will keep on scrolling even if the window cannot scroll
     further.
 
+|easing| (default: `false`)
+    Enable easing for all scrolling animations. Default values will be used
+    for `time_step1` and `time_step2` in `scroll()`. |easing_function| will be
+    used for all scrolling animation. Custom mappings won't be affected.
+
+|easing_function| (default: `true`)
+    When |easing| is enabled this function will be used by all scrolling
+    animations by default. Custom mappings that don't provide an easing
+    function (but include `time_step2`) will also use this function as their
+    easing function.
+
 ===============================================================================
 DEFAULT MAPPINGS                                     *neoscroll-default-mappings*
 
-The following mappings are valid for normal, visual and select mode:
+The following mappings are valid for normal, visual and select mode.
+
+When |easing| is `false`:
 
       Key     Function ~
      <C-u>    scroll(-vim.wo.scroll, true, 8)
@@ -156,6 +154,20 @@ The following mappings are valid for normal, visual and select mode:
       zt      zt(7)
       zz      zz(7)
       zb      zb(7)
+
+
+When |easing| is `true`:
+
+    Key     Function ~
+   <C-u>    scroll(-vim.wo.scroll, true, 7, 15)
+   <C-d>    scroll( vim.wo.scroll, true, 7, 15)
+   <C-b>    scroll(-vim.api.nvim_win_get_height(0), true, 5, 20)
+   <C-f>    scroll( vim.api.nvim_win_get_height(0), true, 5, 20)
+   <C-y>    scroll(-0.10, false, 20, 30)
+   <C-e>    scroll( 0.10, false, 20, 30)
+    zt      zt(5, 10)
+    zz      zz(5, 10)
+    zb      zb(5, 10)
 
 ===============================================================================
 vim:tw=78:ts=4:et:ft=help:norl:
