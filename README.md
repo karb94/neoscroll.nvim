@@ -56,7 +56,7 @@ Your mappings are too long and ugly? Too lazy to create your own mappings? Use t
 ```Lua
 require('neoscroll').setup({
     mappings = {'<C-u>', '<C-d>', '<C-b>', '<C-f>',
-                '<C-y>', '<C-e>', 'zt', 'zz', 'zb'},
+                '<C-y>', '<C-e>', 'zt', 'zz', 'zb'}
     -- Set any other options as needed
 })
 
@@ -96,7 +96,7 @@ Using the same syntactic sugar introduced in _Custom mappings_ we can write the 
 ```Lua
 require('neoscroll').setup({
     mappings = {'<C-u>', '<C-d>', '<C-b>', '<C-f>',
-                '<C-y>', '<C-e>', 'zt', 'zz', 'zb'},
+                '<C-y>', '<C-e>', 'zt', 'zz', 'zb'}
     -- Set any other options as needed
 })
 
