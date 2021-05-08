@@ -40,8 +40,8 @@ local function generate_default_mappings(custom_mappings)
         defaults['zb']    = {'zb'    , {                                            '7' }}
     else
         -- Defaults with easing function
-        defaults['<C-u>'] = {'scroll', {'-vim.wo.scroll'                 , 'true' , '7' , '15'}}
-        defaults['<C-d>'] = {'scroll', { 'vim.wo.scroll'                 , 'true' , '7' , '15'}}
+        defaults['<C-u>'] = {'scroll', {'-vim.wo.scroll'                 , 'true' , '7' , '25'}}
+        defaults['<C-d>'] = {'scroll', { 'vim.wo.scroll'                 , 'true' , '7' , '25'}}
         defaults['<C-b>'] = {'scroll', {'-vim.api.nvim_win_get_height(0)', 'true' , '5' , '20'}}
         defaults['<C-f>'] = {'scroll', { 'vim.api.nvim_win_get_height(0)', 'true' , '5' , '20'}}
         defaults['<C-y>'] = {'scroll', {'-0.10'                          , 'false', '20', '30'}}

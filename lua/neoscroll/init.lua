@@ -11,6 +11,7 @@ autocmd!
 autocmd ColorScheme * highlight NeoscrollHiddenCursor gui=reverse blend=100
 augroup END
 ]], true)
+vim.cmd('highlight NeoscrollHiddenCursor gui=reverse blend=100')
 
 
 -- Helper function to check if a number is a float
@@ -237,14 +238,14 @@ function neoscroll.scroll(lines, move_cursor, time_step1, time_step2, easing)
     -- If still scrolling just modify the amount of lines to scroll
     -- If the scroll is in the opposite direction and longer than lines stop
     if scrolling then
-        target_line = target_line + lines
-        -- local lines_to_scroll = current_line - target_line
-        -- local opposite_direction = lines_to_scroll * lines > 0
-        -- local long_scroll = math.abs(lines_to_scroll) - math.abs(lines) > 0
-        -- if opposite_direction and long_scroll then
-        --     stop_scrolling()
-        --     return
-        -- end
+        local lines_to_scroll = current_line - target_line
+        local opposite_direction = lines_to_scroll * lines > 0
+        local long_scroll = math.abs(lines_to_scroll) - math.abs(lines) > 0
+        if opposite_direction and long_scroll then
+            target_line = current_line - lines
+        else
+            target_line = target_line + lines
+        end
         return
     end
     -- Check if the window and the cursor are allowed to scroll in that direction
