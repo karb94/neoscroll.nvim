@@ -115,7 +115,7 @@ t['<C-b>'] = {'scroll', {'-vim.api.nvim_win_get_height(0)', 'true', '5', '20', e
 t['<C-f>'] = {'scroll', { 'vim.api.nvim_win_get_height(0)', 'true', '5', '20', easing2}}
 -- Use the default easing function defined in easing_function from 20 ms to 30 ms time-step
 t['<C-y>'] = {'scroll', {'-0.10', 'false', '20', '30'}}
-t['<C-e>'] = {'scroll', { '0.10', 'false', '20', '30;}}
+t['<C-e>'] = {'scroll', { '0.10', 'false', '20', '30'}}
 -- Use a constant time-step of 7 ms
 t['zt']    = {'zt', {'7'}}
 t['zz']    = {'zz', {'7'}}
