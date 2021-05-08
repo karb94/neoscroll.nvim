@@ -191,7 +191,7 @@ end
 
 
 -- Scrolling destructor
-local function finish_scrolling(move_cursor)
+local function stop_scrolling(move_cursor)
     if opts.hide_cursor == true and move_cursor then
         restore_cursor()
     end
@@ -211,7 +211,6 @@ end
 
 
 local function compute_time_step(lines_to_scroll, lines, easing, time_step1, time_step2)
-    print('Scrolling with easing function')
     local lines_to_scroll_abs = math.abs(lines_to_scroll)
     local lines_range = math.abs(lines)
     if lines_to_scroll_abs >= lines_range then return time_step1 end
@@ -227,15 +226,25 @@ local neoscroll = {}
 -- Scrolling function
 -- lines: number of lines to scroll or fraction of window to scroll
 -- move_cursor: scroll the window and the cursor simultaneously
--- time_step: time (in miliseconds) between one line scroll and the next one
+-- time_step1: initial time-step between two single-line scrolls
+-- time_step2: last time-step between two single-line scrolls
+-- easing: easing function used to ease the scrolling animation
 function neoscroll.scroll(lines, move_cursor, time_step1, time_step2, easing)
     -- If lines is a fraction of the window transform it to lines
     if is_float(lines) then
         lines = get_lines_from_win_fraction(lines)
     end
     -- If still scrolling just modify the amount of lines to scroll
+    -- If the scroll is in the opposite direction and longer than lines stop
     if scrolling then
         target_line = target_line + lines
+        -- local lines_to_scroll = current_line - target_line
+        -- local opposite_direction = lines_to_scroll * lines > 0
+        -- local long_scroll = math.abs(lines_to_scroll) - math.abs(lines) > 0
+        -- if opposite_direction and long_scroll then
+        --     stop_scrolling()
+        --     return
+        -- end
         return
     end
     -- Check if the window and the cursor are allowed to scroll in that direction
@@ -249,18 +258,17 @@ function neoscroll.scroll(lines, move_cursor, time_step1, time_step2, easing)
     local function scroll_callback()
         local lines_to_scroll = target_line - current_line
         if lines_to_scroll == 0 then
-            finish_scrolling(move_cursor)
+            stop_scrolling(move_cursor)
             return
         end
 
         scroll_window, scroll_cursor = who_scrolls(lines_to_scroll, move_cursor)
         if not scroll_window and not scroll_cursor then
-            finish_scrolling(move_cursor)
+            stop_scrolling(move_cursor)
             return
         end
 
         if time_step2 ~= nil then
-            print('dfsd')
             local ef = easing and easing or opts.easing_function
             local timer_repeat = compute_time_step(lines_to_scroll, lines,
                 ef, time_step1, time_step2)
