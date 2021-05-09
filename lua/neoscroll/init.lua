@@ -231,6 +231,9 @@ local neoscroll = {}
 -- time_step2: last time-step between two single-line scrolls
 -- easing: easing function used to ease the scrolling animation
 function neoscroll.scroll(lines, move_cursor, time_step1, time_step2, easing)
+    if lines == 0 then
+        return
+    end
     -- If lines is a fraction of the window transform it to lines
     if is_float(lines) then
         lines = get_lines_from_win_fraction(lines)
