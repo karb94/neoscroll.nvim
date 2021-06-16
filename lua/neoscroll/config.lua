@@ -1,8 +1,8 @@
 local config = {}
 
 config.options = {
-    mappings = {'<C-u>', '<C-d>', '<C-b>', '<C-f>',
-                '<C-y>', '<C-e>', 'zt', 'zz', 'zb'},
+    mappings = {'<C-u>', '<C-d>', '<C-b>', '<C-f>', '<C-y>', '<C-e>',
+        'zt', 'zz', 'zb'},
     hide_cursor = true,
     stop_eof = true,
     respect_scrolloff = false,
@@ -45,6 +45,8 @@ local function generate_default_mappings(custom_mappings)
     defaults['zt']    = {'zt'    , {                                            '250' }}
     defaults['zz']    = {'zz'    , {                                            '250' }}
     defaults['zb']    = {'zb'    , {                                            '250' }}
+    defaults['gg']  = {'scroll', {'-vim.fn.line(".")+1', 'true', '1500', [["cubic"]]}}
+    defaults['G'] = {'scroll', {'vim.fn.line("$")-vim.fn.line(".")', 'true', '1500', [["cubic"]]}}
 
     local t = {}
     local keys = config.options.mappings
