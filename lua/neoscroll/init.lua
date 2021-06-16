@@ -3,6 +3,7 @@ local opts = require('neoscroll.config').options
 local scroll_timer = vim.loop.new_timer()
 local target_line = 0
 local current_line = 0
+local cursor_win_line
 local scrolling = false
 local guicursor
 -- Highlight group to hide the cursor
@@ -24,14 +25,16 @@ end
 -- excecute commands to scroll screen [and cursor] up/down one line
 -- `execute` is necessary to allow the use of special characters like <C-y>
 -- The bang (!) `normal!` in normal ignores mappings
-local function scroll_up(scroll_window, scroll_cursor)
-    local cursor_scroll_input = scroll_cursor and 'gk' or ''
+local function scroll_up(scroll_window, scroll_cursor, n_repeat)
+    local n = n_repeat == nil and 1 or n_repeat
+    local cursor_scroll_input = scroll_cursor and string.rep('gk', n) or ''
     local window_scroll_input = scroll_window and [[\<C-y>]] or ''
     local scroll_input = cursor_scroll_input .. window_scroll_input
     return [[exec "normal! ]] .. scroll_input .. [["]]
 end
-local function scroll_down(scroll_window, scroll_cursor)
-    local cursor_scroll_input = scroll_cursor and 'gj' or ''
+local function scroll_down(scroll_window, scroll_cursor, n_repeat)
+    local n = n_repeat == nil and 1 or n_repeat
+    local cursor_scroll_input = scroll_cursor and string.rep('gj', n) or ''
     local window_scroll_input = scroll_window and [[\<C-e>]] or ''
     local scroll_input = cursor_scroll_input .. window_scroll_input
     return [[exec "normal! ]] .. scroll_input .. [["]]
@@ -165,9 +168,22 @@ local function scroll_one_line(lines_to_scroll, scroll_window, scroll_cursor)
     if lines_to_scroll > 0 then
         current_line = current_line + 1
         vim.cmd(scroll_down(scroll_window, scroll_cursor))
+        -- Correct for wrapped lines
+        local lines_behind = cursor_win_line - vim.fn.winline()
+        if scroll_cursor and scroll_window and lines_behind > 0 then
+            vim.cmd(scroll_down(false, scroll_cursor, lines_behind))
+            print(cursor_win_line - vim.fn.winline())
+        end
     else
         current_line = current_line - 1
         vim.cmd(scroll_up(scroll_window, scroll_cursor))
+        -- Correct for wrapped lines
+        -- print(vim.fn.winline() - cursor_win_line)
+        local lines_behind = vim.fn.winline() - cursor_win_line
+        if scroll_cursor and scroll_window and lines_behind > 0 then
+            vim.cmd(scroll_up(false, scroll_cursor, lines_behind))
+            print(vim.fn.winline() - cursor_win_line)
+        end
     end
 end
 
@@ -261,6 +277,7 @@ function neoscroll.scroll(lines, move_cursor, time, easing_function)
         end
         return
     end
+    cursor_win_line = vim.fn.winline()
     -- Check if the window and the cursor are allowed to scroll in that direction
     local scroll_window, scroll_cursor = who_scrolls(lines, move_cursor)
     -- If neither the window nor the cursor are allowed to scroll finish early
