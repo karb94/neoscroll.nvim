@@ -172,7 +172,6 @@ local function scroll_one_line(lines_to_scroll, scroll_window, scroll_cursor)
         local lines_behind = cursor_win_line - vim.fn.winline()
         if scroll_cursor and scroll_window and lines_behind > 0 then
             vim.cmd(scroll_down(false, scroll_cursor, lines_behind))
-            print(cursor_win_line - vim.fn.winline())
         end
     else
         current_line = current_line - 1
@@ -182,7 +181,6 @@ local function scroll_one_line(lines_to_scroll, scroll_window, scroll_cursor)
         local lines_behind = vim.fn.winline() - cursor_win_line
         if scroll_cursor and scroll_window and lines_behind > 0 then
             vim.cmd(scroll_up(false, scroll_cursor, lines_behind))
-            print(vim.fn.winline() - cursor_win_line)
         end
     end
 end
