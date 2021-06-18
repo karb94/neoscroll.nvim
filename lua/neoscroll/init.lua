@@ -29,14 +29,14 @@ local function scroll_up(scroll_window, scroll_cursor, n_repeat)
     local n = n_repeat == nil and 1 or n_repeat
     local cursor_scroll_input = scroll_cursor and string.rep('gk', n) or ''
     local window_scroll_input = scroll_window and [[\<C-y>]] or ''
-    local scroll_input = cursor_scroll_input .. window_scroll_input
+    local scroll_input = window_scroll_input .. cursor_scroll_input
     return [[exec "normal! ]] .. scroll_input .. [["]]
 end
 local function scroll_down(scroll_window, scroll_cursor, n_repeat)
     local n = n_repeat == nil and 1 or n_repeat
     local cursor_scroll_input = scroll_cursor and string.rep('gj', n) or ''
     local window_scroll_input = scroll_window and [[\<C-e>]] or ''
-    local scroll_input = cursor_scroll_input .. window_scroll_input
+    local scroll_input =  window_scroll_input .. cursor_scroll_input
     return [[exec "normal! ]] .. scroll_input .. [["]]
 end
 
@@ -177,7 +177,6 @@ local function scroll_one_line(lines_to_scroll, scroll_window, scroll_cursor)
         current_line = current_line - 1
         vim.cmd(scroll_up(scroll_window, scroll_cursor))
         -- Correct for wrapped lines
-        -- print(vim.fn.winline() - cursor_win_line)
         local lines_behind = vim.fn.winline() - cursor_win_line
         if scroll_cursor and scroll_window and lines_behind > 0 then
             vim.cmd(scroll_up(false, scroll_cursor, lines_behind))
