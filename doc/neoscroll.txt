@@ -115,6 +115,13 @@ OPTIONS                                                       *neoscroll-options
     When `move_cursor` is `true` scrolling downwards will stop when the bottom
     line of the window is the last line of the file.
 
+|use_local_scrolloff| (default: `false`)
+    Due to the Neovim #13964 bug if the local 'scrolloff' option is not
+    explicitly set it doesn't inherit the global value of the option, instead
+    it stores a garbage (random) value. Therefore Neoscroll cannot make
+    assumptions about what scope to use so it will use the global scope by
+    default unless this option is set to `true`.
+
 |respect_scrolloff| (default: `false`)
     The cursor stops at the scrolloff margin. Try combining this option with
     either |stop_eof| or |cursor_scrolls_alone| (or both).

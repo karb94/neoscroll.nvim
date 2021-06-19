@@ -20,7 +20,14 @@ You will need neovim 0.5 for this plugin to work. Install it using your favorite
 
 - With [vim-plug](https://github.com/junegunn/vim-plug): `Plug 'karb94/neoscroll.nvim'`
 
-**IMPORTANT:** Neoscroll uses the local `scrolloff` value to behave as expected. If not explicitly set this option variable can take a garbage value. This is a [reported Neovim bug](https://github.com/neovim/neovim/issues/13964). Neoscroll tries to be smart about deciding whether you set that value or it is a garbage value and the global `scrolloff` variable should be used instead. Unfortunately there is no way to tell for sure at the moment so some bugs can appear as a result of this (see issues [#11](https://github.com/karb94/neoscroll.nvim/issues/11) and [#28](https://github.com/karb94/neoscroll.nvim/issues/28)). To avoid any unwanted behaviour you can set the local `scrolloff` value explicitly by adding `setlocal scrolloff=[scrolloff value]` in you `init.vim` file or `vim.wo.scrolloff = [scrolloff value]` in your `init.lua`.
+**IMPORTANT:** Neoscroll uses the value of the `scrolloff` option to behave as
+expected. If the local scope of this variable is not explicitly set it will
+store a garbage random value instead of inheriting the global value of the
+option. This is a [reported Neovim
+bug](https://github.com/neovim/neovim/issues/13964). Therefore Neoscroll will
+use the the global `scrolloff` variable instead. If you want Neoscroll to use
+the local `scrolloff` value then set the Neoscroll option `use_local_scrolloff`
+to `true`.
 
 
 ## Quickstart
@@ -45,6 +52,7 @@ require('neoscroll').setup({
                 '<C-y>', '<C-e>', 'zt', 'zz', 'zb'},
     hide_cursor = true,          -- Hide cursor while scrolling
     stop_eof = true,             -- Stop at <EOF> when scrolling downwards
+    use_local_scrolloff = false, -- Use the local scope of scrolloff instead of the global scope
     respect_scrolloff = false,   -- Stop scrolling when the cursor reaches the scrolloff margin of the file
     cursor_scrolls_alone = true, -- The cursor will keep on scrolling even if the window cannot scroll further
     easing_function = nil        -- Default easing function
@@ -127,7 +135,10 @@ require('neoscroll.config').set_mappings(t)
 
 
 ## Known issues
-* Because of a [Neovim bug](https://github.com/neovim/neovim/issues/13964) if local `scrolloff` option is not explicitly set some issues can appear while using `zt`/`zb` or when the option `respect_scrolloff` is enabled (see [#11](https://github.com/karb94/neoscroll.nvim/issues/11) and [#28](https://github.com/karb94/neoscroll.nvim/issues/28)) 
+* Because of a [Neovim bug](https://github.com/neovim/neovim/issues/13964)
+  Neoscroll has to use the global `scrolloff` value by default. Related issues:
+  [#11](https://github.com/karb94/neoscroll.nvim/issues/11) and
+  [#28](https://github.com/karb94/neoscroll.nvim/issues/28). 
 * `<C-u>`, `<C-d>`, `<C-b>`, `<C-f>` mess up macros ([issue](https://github.com/karb94/neoscroll.nvim/issues/9)).
 
 
