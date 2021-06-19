@@ -20,6 +20,8 @@ You will need neovim 0.5 for this plugin to work. Install it using your favorite
 
 - With [vim-plug](https://github.com/junegunn/vim-plug): `Plug 'karb94/neoscroll.nvim'`
 
+**IMPORTANT:** Neoscroll uses the local `scrolloff` value to behave as expected. If not explicitly set this option variable can take a garbage value. This is a [reported neovim bug](https://github.com/neovim/neovim/issues/13964). Neoscroll tries to be smart about deciding whether you set that value or it is a garbage value and the global `scrolloff` variable should be used instead. Unfortunately there is no way to tell for sure at the moment so some bugs can appear as a result of this (see issues [#11](https://github.com/karb94/neoscroll.nvim/issues/11) and [#28](https://github.com/karb94/neoscroll.nvim/issues/28)). To avoid any unwanted behaviour you can set the local `scrolloff` value explicitly by adding `setlocal scrolloff=[scrolloff value]` in you `init.vim` file or `vim.wo.scrolloff = [scrolloff value]` in your `init.lua`.
+
 
 ## Quickstart
 Add the `setup()` function to your init file.
