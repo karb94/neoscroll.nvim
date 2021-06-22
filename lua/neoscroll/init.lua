@@ -4,7 +4,7 @@ local so_scope
 if require('neoscroll.config').options.use_local_scrolloff then
     so_scope = 'wo'
 else
-    so_scope = 'go'
+    so_scope = 'o'
 end
 
 local scroll_timer = vim.loop.new_timer()
