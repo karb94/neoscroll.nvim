@@ -1,11 +1,6 @@
 local config = require('neoscroll.config')
 local opts = require('neoscroll.config').options
 local so_scope
-if require('neoscroll.config').options.use_local_scrolloff then
-    so_scope = 'wo'
-else
-    so_scope = 'go'
-end
 
 local scroll_timer = vim.loop.new_timer()
 local target_line = 0
@@ -56,6 +51,8 @@ local function scroll_down(data, scroll_window, scroll_cursor, n_repeat)
     local scroll_input
     if ((data.first_line_visible and data.win_lines_above_cursor <= vim[so_scope].scrolloff)
         or data.win_lines_above_cursor <= vim[so_scope].scrolloff) and scroll_window then
+        -- print(vim[so_scope].scrolloff)
+        print(so_scope)
         scroll_input = window_scroll_input
     else
         scroll_input = window_scroll_input .. cursor_scroll_input
@@ -393,6 +390,11 @@ function neoscroll.setup(custom_opts)
     require('neoscroll.config').set_mappings()
     vim.cmd('command! NeoscrollEnablePM let b:neoscroll_performance_mode = v:true')
     vim.cmd('command! NeoscrollDisablePM let b:neoscroll_performance_mode = v:false')
+    if opts.use_local_scrolloff then
+        so_scope = 'wo'
+    else
+        so_scope = 'go'
+    end
 end
 
 
