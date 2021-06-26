@@ -51,8 +51,6 @@ local function scroll_down(data, scroll_window, scroll_cursor, n_repeat)
     local scroll_input
     if ((data.first_line_visible and data.win_lines_above_cursor <= vim[so_scope].scrolloff)
         or data.win_lines_above_cursor <= vim[so_scope].scrolloff) and scroll_window then
-        -- print(vim[so_scope].scrolloff)
-        print(so_scope)
         scroll_input = window_scroll_input
     else
         scroll_input = window_scroll_input .. cursor_scroll_input
