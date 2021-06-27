@@ -25,7 +25,7 @@ expected. If the local scope of this variable is not explicitly set it will
 store a garbage random value instead of inheriting the global value of the
 option. This is a [reported Neovim
 bug](https://github.com/neovim/neovim/issues/13964). Therefore Neoscroll will
-use the the global `scrolloff` value by default.. If you want Neoscroll to use
+use the global `scrolloff` value by default.. If you want Neoscroll to use
 the local `scrolloff` value then set the Neoscroll option `use_local_scrolloff`
 to `true` but make sure you set the local `scrolloff` explicitly either in you
 init file or at runtime.
