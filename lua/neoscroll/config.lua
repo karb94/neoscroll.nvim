@@ -8,20 +8,11 @@ config.options = {
     use_local_scrolloff = false,
     respect_scrolloff = false,
     cursor_scrolls_alone = true,
-    easing_function = nil
 }
 
-
--- Default options
-function config.set_options(opts)
-    opts = opts or {}
-    for opt, _ in pairs(config.options) do
-        if opts[opt] ~= nil then
-            config.options[opt] = opts[opt]
-        end
-    end
+function config.set_options(custom_opts)
+  config.options = vim.tbl_deep_extend("force", config.options, custom_opts or {})
 end
-
 
 config.easing_functions = {
     quadratic = function(x) return 1 - math.pow(1-x, 1/2)     end,
@@ -29,11 +20,8 @@ config.easing_functions = {
     quartic   = function(x) return 1 - math.pow(1-x, 1/4)     end,
     quintic   = function(x) return 1 - math.pow(1-x, 1/5)     end,
     circular  = function(x) return 1 - math.pow(1-x*x, 1/2)   end,
-    sine      = function(x) return 2 * math.asin(x) / math.pi end
+    sine      = function(x) return 2 * math.asin(x) / math.pi end,
 }
-
-
-config.key_to_function = {}
 
 local function generate_default_mappings(custom_mappings)
     custom_mappings = custom_mappings and custom_mappings or {}
@@ -47,8 +35,8 @@ local function generate_default_mappings(custom_mappings)
     defaults['zt']    = {'zt'    , {                                            '250' }}
     defaults['zz']    = {'zz'    , {                                            '250' }}
     defaults['zb']    = {'zb'    , {                                            '250' }}
-    defaults['gg']  = {'scroll', {'-vim.fn.line(".")+1', 'true', '1500', [["cubic"]]}}
-    defaults['G'] = {'scroll', {'vim.fn.line("$")-vim.fn.line(".")', 'true', '1500', [["cubic"]]}}
+    defaults['G']     = {'G'     , {                                            '100'}}
+    defaults['gg']    = {'gg'    , {                                            '100'}}
 
     local t = {}
     local keys = config.options.mappings

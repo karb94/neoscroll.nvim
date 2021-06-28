@@ -1,5 +1,5 @@
 local config = require('neoscroll.config')
-local opts = require('neoscroll.config').options
+local opts
 local so_scope
 
 local scroll_timer = vim.loop.new_timer()
@@ -9,6 +9,7 @@ local cursor_win_line
 local scrolling = false
 local continuous_scroll = false
 local guicursor
+local cursorline
 -- Highlight group to hide the cursor
 vim.api.nvim_exec([[
 augroup custom_highlight
@@ -71,25 +72,37 @@ end
 
 -- Restore hidden cursor during scrolling
 local function restore_cursor()
-    if vim.o.termguicolors and vim.o.guicursor ~= '' then
+    if guicursor then
         vim.o.guicursor = guicursor
     end
 end
 
 
-local function get_lines_below_cursor()
+local function get_lines_above(line)
+    local lines_above = 0
+    local first_folded_line = vim.fn.foldclosed(line)
+    if first_folded_line ~= -1 then line = first_folded_line end
+    while(line > 1) do
+        lines_above = lines_above + 1
+        line = line - 1
+        first_folded_line = vim.fn.foldclosed(line)
+        if first_folded_line ~= -1 then line = first_folded_line end
+    end
+    return lines_above
+end
+
+local function get_lines_below(line)
     local last_line = vim.fn.line("$")
-    local lines_below_cursor = 0
-    local line = vim.fn.line(".")
+    local lines_below = 0
     local last_folded_line = vim.fn.foldclosedend(line)
     if last_folded_line ~= -1 then line = last_folded_line end
     while(line < last_line) do
-        lines_below_cursor = lines_below_cursor + 1
+        lines_below = lines_below + 1
         line = line + 1
         last_folded_line = vim.fn.foldclosedend(line)
         if last_folded_line ~= -1 then line = last_folded_line end
     end
-    return lines_below_cursor
+    return lines_below
 end
 
 
@@ -108,7 +121,7 @@ local function get_data()
     data.win_lines_below_cursor = data.window_height - data.cursor_win_line
     data.win_lines_above_cursor = data.cursor_win_line - 1
     if data.last_line_visible then
-        data.lines_below_cursor = get_lines_below_cursor()
+        data.lines_below_cursor = get_lines_below(vim.fn.line("."))
     end
     return data
 end
@@ -206,13 +219,12 @@ end
 
 
 -- Scrolling constructor
-local function before_scrolling(lines, move_cursor)
+local function before_scrolling(lines, move_cursor, info)
+    if opts.pre_hook ~= nil then opts.pre_hook(info) end
     -- Start scrolling
     scrolling = true
     -- Hide cursor line
-    if opts.hide_cursor and move_cursor then
-        hide_cursor()
-    end
+    if opts.hide_cursor and move_cursor then hide_cursor() end
     -- Performance mode
     if vim.b.neoscroll_performance_mode and move_cursor then
         if vim.g.loaded_nvim_treesitter then
@@ -226,7 +238,7 @@ end
 
 
 -- Scrolling destructor
-local function stop_scrolling(move_cursor)
+local function stop_scrolling(move_cursor, info)
     if opts.hide_cursor == true and move_cursor then
         restore_cursor()
     end
@@ -237,6 +249,7 @@ local function stop_scrolling(move_cursor)
             vim.cmd('TSBufEnable highlight')
         end
     end
+    if opts.post_hook ~= nil then opts.post_hook(info) end
 
     current_line = 0
     target_line = 0
@@ -275,7 +288,7 @@ local neoscroll = {}
 -- lines: number of lines to scroll or fraction of window to scroll
 -- move_cursor: scroll the window and the cursor simultaneously
 -- easing_function: name of the easing function to use for the scrolling animation
-function neoscroll.scroll(lines, move_cursor, time, easing_function)
+function neoscroll.scroll(lines, move_cursor, time, easing_function, info)
     -- If lines is a fraction of the window transform it to lines
     if is_float(lines) then
         lines = get_lines_from_win_fraction(lines)
@@ -314,13 +327,13 @@ function neoscroll.scroll(lines, move_cursor, time, easing_function)
     -- If neither the window nor the cursor are allowed to scroll finish early
     if not scroll_window and not scroll_cursor then return end
     -- Preparation before scrolling starts
-    before_scrolling(lines, move_cursor)
+    before_scrolling(lines, move_cursor, info)
     -- If easing function is not specified default to easing_function
     local ef = easing_function and easing_function or opts.easing_function
 
     local lines_to_scroll = math.abs(current_line - target_line)
     scroll_one_line(lines, scroll_window, scroll_cursor, data)
-    if lines_to_scroll == 1 then stop_scrolling(move_cursor) end
+    if lines_to_scroll == 1 then stop_scrolling(move_cursor, info) end
     local time_step = compute_time_step(lines_to_scroll, lines, time, ef)
     local next_time_step = compute_time_step(lines_to_scroll-1, lines, time, ef)
     local next_next_time_step = compute_time_step(lines_to_scroll-2, lines, time, ef)
@@ -332,7 +345,7 @@ function neoscroll.scroll(lines, move_cursor, time, easing_function)
         local data = get_data()
         scroll_window, scroll_cursor = who_scrolls(data, move_cursor, lines_to_scroll)
         if not scroll_window and not scroll_cursor then
-            stop_scrolling(move_cursor)
+            stop_scrolling(move_cursor, info)
             return
         end
 
@@ -345,7 +358,7 @@ function neoscroll.scroll(lines, move_cursor, time, easing_function)
         end
         scroll_one_line(lines_to_scroll, scroll_window, scroll_cursor, data)
         if math.abs(lines_to_scroll) == 1 then
-            stop_scrolling(move_cursor)
+            stop_scrolling(move_cursor, info)
             return
         end
 
@@ -359,7 +372,7 @@ end
 
 
 -- Wrapper for zt
-function neoscroll.zt(half_screen_time, easing)
+function neoscroll.zt(half_screen_time, easing, info)
     local window_height = vim.api.nvim_win_get_height(0)
     local win_lines_above_cursor = vim.fn.winline() - 1
     -- Temporary fix for garbage values in local scrolloff when not set
@@ -367,19 +380,19 @@ function neoscroll.zt(half_screen_time, easing)
     if lines == 0 then return end
     local corrected_time = math.floor(
         half_screen_time * (math.abs(lines)/(window_height/2)) + 0.5)
-    neoscroll.scroll(lines, false, corrected_time, easing)
+    neoscroll.scroll(lines, false, corrected_time, easing, info)
 end
 -- Wrapper for zz
-function neoscroll.zz(half_screen_time, easing)
+function neoscroll.zz(half_screen_time, easing, info)
     local window_height = vim.api.nvim_win_get_height(0)
     local lines = vim.fn.winline() - math.floor(window_height/2 + 1)
     if lines == 0 then return end
     local corrected_time = math.floor(
         half_screen_time * (math.abs(lines)/(window_height/2)) + 0.5)
-    neoscroll.scroll(lines, false, corrected_time, easing)
+    neoscroll.scroll(lines, false, corrected_time, easing, info)
 end
 -- Wrapper for zb
-function neoscroll.zb(half_screen_time, easing)
+function neoscroll.zb(half_screen_time, easing, info)
     local window_height = vim.api.nvim_win_get_height(0)
     local lines_below_cursor = window_height - vim.fn.winline()
     -- Temporary fix for garbage values in local scrolloff when not set
@@ -387,12 +400,32 @@ function neoscroll.zb(half_screen_time, easing)
     if lines == 0 then return end
     local corrected_time = math.floor(
         half_screen_time * (math.abs(lines)/(window_height/2)) + 0.5)
-    neoscroll.scroll(lines, false, corrected_time, easing)
+    neoscroll.scroll(lines, false, corrected_time, easing, info)
 end
 
+function neoscroll.G(half_screen_time, easing, info)
+  local lines = get_lines_below(vim.fn.line("w$"))
+  local window_height = vim.api.nvim_win_get_height(0)
+  local cursor_win_line = vim.fn.winline()
+  local win_lines_below_cursor = window_height - cursor_win_line
+    local corrected_time = math.floor(
+        half_screen_time * (math.abs(lines)/(window_height/2)) + 0.5)
+  neoscroll.scroll(lines, true, corrected_time, easing, {G=true})
+end
+
+function neoscroll.gg(half_screen_time, easing, info)
+    local lines = get_lines_above(vim.fn.line("w0"))
+    local window_height = vim.api.nvim_win_get_height(0)
+    local cursor_win_line = vim.fn.winline()
+    local lines = -lines - cursor_win_line
+    local corrected_time = math.floor(
+        half_screen_time * (math.abs(lines)/(window_height/2)) + 0.5)
+    neoscroll.scroll(lines, true, corrected_time, easing, info)
+end
 
 function neoscroll.setup(custom_opts)
-    require('neoscroll.config').set_options(custom_opts)
+    config.set_options(custom_opts)
+    opts = require('neoscroll.config').options
     require('neoscroll.config').set_mappings()
     vim.cmd('command! NeoscrollEnablePM let b:neoscroll_performance_mode = v:true')
     vim.cmd('command! NeoscrollDisablePM let b:neoscroll_performance_mode = v:false')

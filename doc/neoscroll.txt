@@ -40,7 +40,7 @@ neoscroll.setup({opts})                                       *neoscroll-setup()
         })
 <
 
-neoscroll.scroll(lines, move_cursor, time[, easing])           *neoscroll.scroll()*
+neoscroll.scroll(lines, move_cursor, time[, easing, info])   *neoscroll.scroll()*
     Scroll a number of lines or a fraction of the current window optionally
     using an easing function to smooth the start and the end of the scrolling
     animation.
@@ -59,6 +59,9 @@ neoscroll.scroll(lines, move_cursor, time[, easing])           *neoscroll.scroll
             animation. If no name is passed the easing function defined in
             |easing_function| will be used. Supported easing function names:
             `quadratic`, `cubic`, `quartic`, `quintic`, `circular`, `sine`.
+        `info`: optional parameter that will be passed to the |pre_hook| and
+            |post_hook| functions. Useful to differenciate different scrolling
+            animations or to pass additional information to the hook functions.
 
     Examples: >
         " Scroll 10 lines upwards mimicking <C-d>
@@ -73,14 +76,13 @@ neoscroll.scroll(lines, move_cursor, time[, easing])           *neoscroll.scroll
         :lua require('neoscroll').scroll(-20, true, 400, "sine")
 <
 
-neoscroll.{zt,zz,zb}(half_win_time, easing)         *neoscroll-zt-zz-zb*
+neoscroll.{zt,zz,zb}(half_win_time[, easing, info])          *neoscroll-zt-zz-zb*
     `scroll()` wrapper functions to mimic |zt|, |zz| and |zb| scrolling
     commands. The `half_win_time` argument is the time it would take to
     scroll half of the window. The `time` argument passed to the `scroll()`
     function is calculated as: >
         half_screen_time * (lines_to_scroll/(window_lines/2))
-<
-    where `lines_to_scroll` is the number of lines to be scrolled and
+<    where `lines_to_scroll` is the number of lines to be scrolled and
     `window_lines` is the number of lines of the window. This ensures that
     when there are very few lines to scroll the duration of the scrolling
     animation is proportionately shorter.
@@ -135,6 +137,17 @@ OPTIONS                                                       *neoscroll-options
     `scroll()` that don't provide the optional `easing` argument will use this
     easing function. If set to `nil` (the default) no easing function will be
     used in the scrolling animation (constant scrolling speed).
+
+|pre_hook| (default: `nil`)
+    Function to run before the scrolling animation starts. The function will
+    be called with the `info` parameter which can be optionally passed to
+    `scroll()` (or any of the provided wrappers). This can be used to
+    conditionally run different hooks for different types of scrolling
+    animations.
+
+|post_hook| (default: `nil`)
+    Equivalent to |pre_hook| but the function will run after the scrolling
+    animation ends.
 
 ===============================================================================
 DEFAULT MAPPINGS                                     *neoscroll-default-mappings*
