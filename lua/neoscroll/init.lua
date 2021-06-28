@@ -312,7 +312,7 @@ function neoscroll.scroll(lines, move_cursor, time, easing_function)
 
     local lines_to_scroll = math.abs(current_line - target_line)
     scroll_one_line(lines, scroll_window, scroll_cursor, data)
-    if lines_to_scroll == 1 then stop_scrolling() end
+    if lines_to_scroll == 1 then stop_scrolling(move_cursor) end
     local time_step = compute_time_step(lines_to_scroll, lines, time, ef)
     local next_time_step = compute_time_step(lines_to_scroll-1, lines, time, ef)
     local next_next_time_step = compute_time_step(lines_to_scroll-2, lines, time, ef)
