@@ -10,7 +10,7 @@ https://user-images.githubusercontent.com/41967813/121818668-7b36c800-cc80-11eb-
 * A single scrolling function that accepts either the number of lines or the percentage of the window to scroll.
 * Cursor is hidden while scrolling (optional) for a more pleasing scrolling experience.
 * Customizable scrolling behaviour.
-* Use custom easing functions for the scrolling animation.
+* You can use predefined easing functions for the scrolling animation.
 * Performance mode that turns off syntax highlighting while scrolling for slower machines or files with heavy regex syntax highlighting.
 
 ## Installation
@@ -25,7 +25,7 @@ expected. If the local scope of this variable is not explicitly set it will
 store a garbage random value instead of inheriting the global value of the
 option. This is a [reported Neovim
 bug](https://github.com/neovim/neovim/issues/13964). Therefore Neoscroll will
-use the global `scrolloff` value by default.. If you want Neoscroll to use
+use the global `scrolloff` value by default. If you want Neoscroll to use
 the local `scrolloff` value then set the Neoscroll option `use_local_scrolloff`
 to `true` but make sure you set the local `scrolloff` explicitly either in you
 init file or at runtime.
@@ -77,7 +77,6 @@ require('neoscroll').setup({
     -- Set any options as needed
 })
 
--- Syntax scrolling function: `scroll(lines, move_cursor, time[, easing_function_name])`
 local t = {}
 -- Syntax: t[keys] = {function, {function arguments}}
 t['<C-u>'] = {'scroll', {'-vim.wo.scroll', 'true', '250'}}
@@ -139,7 +138,7 @@ require('neoscroll.config').set_mappings(t)
 * Because of a [Neovim bug](https://github.com/neovim/neovim/issues/13964)
   Neoscroll has to use the global `scrolloff` value by default. Related issues:
   [#11](https://github.com/karb94/neoscroll.nvim/issues/11) and
-  [#28](https://github.com/karb94/neoscroll.nvim/issues/28). 
+  [#28](https://github.com/karb94/neoscroll.nvim/issues/28). Read the _IMPORTANT_ note under the _Installation_ section.
 * `<C-u>`, `<C-d>`, `<C-b>`, `<C-f>` mess up macros ([issue](https://github.com/karb94/neoscroll.nvim/issues/9)).
 
 
