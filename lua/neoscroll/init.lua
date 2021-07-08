@@ -7,6 +7,7 @@ local target_line = 0
 local current_line = 0
 local cursor_win_line
 local scrolling = false
+local continuous_scroll = false
 local guicursor
 -- Highlight group to hide the cursor
 vim.api.nvim_exec([[
@@ -241,6 +242,7 @@ local function stop_scrolling(move_cursor)
     target_line = 0
     scroll_timer:stop()
     scrolling = false
+    continuous_scroll = false
 end
 
 
@@ -288,9 +290,15 @@ function neoscroll.scroll(lines, move_cursor, time, easing_function)
         local long_scroll = math.abs(lines_to_scroll) - math.abs(lines) > 0
         if opposite_direction and long_scroll then
             target_line = current_line - lines
+        elseif continuous_scroll then
+            target_line = current_line + 2*lines
+        elseif math.abs(lines_to_scroll) > math.abs(5*lines) then
+            continuous_scroll = true
+            current_line = target_line - 2*lines
         else
             target_line = target_line + lines
         end
+
         return
     end
     -- Check if the window and the cursor are allowed to scroll in that direction
