@@ -215,7 +215,7 @@ local neoscroll = {}
 function neoscroll.scroll(lines, move_cursor, time, easing_function, info)
 	-- If lines is a fraction of the window transform it to lines
 	if utils.is_float(lines) then
-		lines = get_lines_from_win_fraction(lines)
+		lines = utils.get_lines_from_win_fraction(lines)
 	end
 	if lines == 0 then
 		return
