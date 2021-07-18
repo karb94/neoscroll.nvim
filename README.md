@@ -5,7 +5,7 @@ https://user-images.githubusercontent.com/41967813/121818668-7b36c800-cc80-11eb-
 
 
 ## Features
-* Smooth scrolling for window movement commands (mappings optional): `<C-u>`, `<C-d>`, `<C-b>`, `<C-f>`, `<C-y>`, `<C-e>`, `zt`, `zz` and `zb`.
+* Smooth scrolling for window movement commands (mappings optional): `<C-u>`, `<C-d>`, `<C-b>`, `<C-f>`, `<C-y>`, `<C-e>`, `zt`, `zz`, `zb`, `G` (experimental), `gg` (experimental).
 * Takes into account folds.
 * A single scrolling function that accepts either the number of lines or the percentage of the window to scroll.
 * Cursor is hidden while scrolling (optional) for a more pleasing scrolling experience.
@@ -57,6 +57,8 @@ require('neoscroll').setup({
     respect_scrolloff = false,   -- Stop scrolling when the cursor reaches the scrolloff margin of the file
     cursor_scrolls_alone = true, -- The cursor will keep on scrolling even if the window cannot scroll further
     easing_function = nil        -- Default easing function
+    pre_hook = nil,              -- Function to run before the scrolling animation starts
+    post_hook = nil              -- Function to run after the scrolling animation ends
 })
 ```
 
@@ -132,6 +134,26 @@ t['zb']    = {'zb', {'300'}}
 
 require('neoscroll.config').set_mappings(t)
 ```
+
+## `pre_hook` and `post_hook` functions
+Set `pre_hook` and `post_hook` functions to run custom code before and/or after the scrolling animation.
+The function will be called with the `info` parameter which can be optionally passed to `scroll()` (or any of the provided wrappers). This can be used to conditionally run different hooks for different types of scrolling
+animations.
+
+For example, if you want to hide the `cursorline` only for `<C-d>`/`<C-u>` scrolling animations
+you can do something like this:
+```lua
+require('neoscroll').setup({
+    pre_hook = function(info) if info == "cursorline" then vim.wo.cursorline = false end end,
+    post_hook = function(info) if info == "cursorline" then vim.wo.cursorline = true end end
+})
+local t = {}
+t['<C-u>'] = { 'scroll', { '-vim.wo.scroll', 'true', '350', 'sine', [['cursorline']] } }
+t['<C-d>'] = { 'scroll', {  'vim.wo.scroll', 'true', '350', 'sine', [['cursorline']] } }
+require('neoscroll.config').set_mappings(t)
+```
+Keep in mind that the `info` variable is not restricted to a string. It can also be a table with multiple
+key-pair values.
 
 
 ## Known issues
