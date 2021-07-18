@@ -5,7 +5,7 @@ https://user-images.githubusercontent.com/41967813/121818668-7b36c800-cc80-11eb-
 
 
 ## Features
-* Smooth scrolling for window movement commands (mappings optional): `<C-u>`, `<C-d>`, `<C-b>`, `<C-f>`, `<C-y>`, `<C-e>`, `zt`, `zz`, `zb`, `G` (experimental), `gg` (experimental).
+* Smooth scrolling for window movement commands (mappings optional): `<C-u>`, `<C-d>`, `<C-b>`, `<C-f>`, `<C-y>`, `<C-e>`, `zt`, `zz`, `zb`.
 * Takes into account folds.
 * A single scrolling function that accepts either the number of lines or the percentage of the window to scroll.
 * Cursor is hidden while scrolling (optional) for a more pleasing scrolling experience.
