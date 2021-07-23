@@ -12,6 +12,8 @@ https://user-images.githubusercontent.com/41967813/121818668-7b36c800-cc80-11eb-
 * Customizable scrolling behaviour.
 * You can use predefined easing functions for the scrolling animation.
 * Performance mode that turns off syntax highlighting while scrolling for slower machines or files with heavy regex syntax highlighting.
+* Cancel scroll by scrolling in the opposite direction.
+* Simulated "stop on key release" when holding down a key to scroll.
 
 ## Installation
 You will need neovim 0.5 for this plugin to work. Install it using your favorite plugin manager:
