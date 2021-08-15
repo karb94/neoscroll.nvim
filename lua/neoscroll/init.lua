@@ -285,8 +285,12 @@ function neoscroll.scroll(lines, move_cursor, time, easing_function, info)
 			-- sets the repeat of the next cycle
 			scroll_timer:set_repeat(next_time_step)
 		end
+    if math.abs(lines_to_scroll) == 0 then
+      stop_scrolling(move_cursor, info)
+      return
+    end
 		scroll_one_line(lines_to_scroll, scroll_window, scroll_cursor, data)
-		if math.abs(lines_to_scroll) <= 1 then
+		if math.abs(lines_to_scroll) == 1 then
 			stop_scrolling(move_cursor, info)
 			return
 		end
