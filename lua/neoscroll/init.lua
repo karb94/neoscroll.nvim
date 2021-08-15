@@ -145,7 +145,7 @@ local function before_scrolling(lines, move_cursor, info)
 	scrolling = true
 	-- Hide cursor line
 	if opts.hide_cursor and move_cursor then
-		utils.toggle_cursor()
+		utils.hide_cursor()
 	end
 	-- Performance mode
 	if vim.b.neoscroll_performance_mode and move_cursor then
@@ -161,7 +161,7 @@ end
 -- Scrolling destructor
 local function stop_scrolling(move_cursor, info)
 	if opts.hide_cursor == true and move_cursor then
-		utils.toggle_cursor()
+		utils.unhide_cursor()
 	end
 	--Performance mode
 	if vim.b.neoscroll_performance_mode and move_cursor then
