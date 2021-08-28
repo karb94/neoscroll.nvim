@@ -118,7 +118,6 @@ local function who_scrolls(data, move_cursor, direction)
     end
 	elseif opts.cursor_scrolls_alone then
 		scroll_cursor = not cursor_reached_limit(data)
-    print(scroll_window, scroll_cursor)
 	else
 		scroll_cursor = false
 	end
