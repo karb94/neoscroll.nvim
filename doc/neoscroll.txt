@@ -101,6 +101,14 @@ COMMANDS                                                     *neoscroll-commands
     Enable/disable "Performance Mode" which disables Tree-sitter and regular
     syntax highlighting while scrolling. Particularly useful for large files,
     slow machines or heavy regex syntax highlighting.
+    These commands are the same as |NeoscrollEnableBufferPM| and
+    |NeoscrollDisableBufferPM|.
+
+|NeoscrollEnableBufferPM| / |NeoscrollDisableBufferPM|
+    Enable/disable "Performance Mode" for the current buffer.
+
+|NeoscrollEnableGlobalPM| / |NeoscrollDisablGlobalePM|
+    Enable/disable "Performance Mode" for all buffers.
 
 ===============================================================================
 OPTIONS                                                       *neoscroll-options*
