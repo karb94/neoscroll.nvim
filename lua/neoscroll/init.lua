@@ -157,7 +157,8 @@ local function before_scrolling(lines, move_cursor, info)
 		utils.hide_cursor()
 	end
 	-- Performance mode
-	if vim.b.neoscroll_performance_mode and move_cursor then
+	local performance_mode = vim.b.neoscroll_performance_mode or vim.g.neoscroll_performance_mode
+	if performance_mode and move_cursor then
 		if vim.g.loaded_nvim_treesitter then
 			vim.cmd("TSBufDisable highlight")
 		end
@@ -173,7 +174,8 @@ local function stop_scrolling(move_cursor, info)
 		utils.unhide_cursor()
 	end
 	--Performance mode
-	if vim.b.neoscroll_performance_mode and move_cursor then
+	local performance_mode = vim.b.neoscroll_performance_mode or vim.g.neoscroll_performance_mode
+	if performance_mode and move_cursor then
 		vim.bo.syntax = "ON"
 		if vim.g.loaded_nvim_treesitter then
 			vim.cmd("TSBufEnable highlight")
@@ -372,11 +374,18 @@ function neoscroll.setup(custom_opts)
 	require("neoscroll.config").set_mappings()
 	vim.cmd("command! NeoscrollEnablePM let b:neoscroll_performance_mode = v:true")
 	vim.cmd("command! NeoscrollDisablePM let b:neoscroll_performance_mode = v:false")
+	vim.cmd("command! NeoscrollEnableBufferPM let b:neoscroll_performance_mode = v:true")
+	vim.cmd("command! NeoscrollDisableBufferPM let b:neoscroll_performance_mode = v:false")
+	vim.cmd("command! NeoscrollEnableGlobalPM let g:neoscroll_performance_mode = v:true")
+	vim.cmd("command! NeoscrollDisablGlobalePM let g:neoscroll_performance_mode = v:false")
 	if opts.use_local_scrolloff then
 		so_scope = "wo"
 	else
 		so_scope = "go"
 	end
+  if opts.performance_mode then
+    vim.g.neoscroll_performance_mode = true
+  end
 end
 
 return neoscroll
