@@ -383,9 +383,9 @@ function neoscroll.setup(custom_opts)
 	else
 		so_scope = "go"
 	end
-  if opts.performance_mode then
-    vim.g.neoscroll_performance_mode = true
-  end
+	if opts.performance_mode then
+		vim.g.neoscroll_performance_mode = true
+	end
 end
 
 return neoscroll
