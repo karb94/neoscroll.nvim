@@ -149,6 +149,9 @@ OPTIONS                                                       *neoscroll-options
     Equivalent to |pre_hook| but the function will run after the scrolling
     animation ends.
 
+|performance_mode| (default: `false`)
+    Option to enable "Performance Mode" on all buffers.
+
 ===============================================================================
 DEFAULT MAPPINGS                                     *neoscroll-default-mappings*
 
