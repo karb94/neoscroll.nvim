@@ -62,15 +62,15 @@ end
 
 -- Hide/unhide cursor during scrolling for a better visual effect
 function utils.hide_cursor()
-  if vim.o.termguicolors and vim.o.guicursor ~= "" then
-    utils.guicursor = vim.o.guicursor
-    vim.o.guicursor = "a:NeoscrollHiddenCursor"
-  end
+	if vim.o.termguicolors and vim.o.guicursor ~= "" then
+		utils.guicursor = vim.o.guicursor
+		vim.o.guicursor = "a:NeoscrollHiddenCursor"
+	end
 end
 function utils.unhide_cursor()
-  if vim.o.guicursor == "a:NeoscrollHiddenCursor" then
-    vim.o.guicursor = utils.guicursor
-  end
+	if vim.o.guicursor == "a:NeoscrollHiddenCursor" then
+		vim.o.guicursor = utils.guicursor
+	end
 end
 
 -- Transforms fraction of window to number of lines

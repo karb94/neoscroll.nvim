@@ -29,9 +29,9 @@ local function scroll_up(data, scroll_window, scroll_cursor, n_repeat)
 	local cursor_scroll_input = scroll_cursor and string.rep("gk", n) or ""
 	local window_scroll_input = scroll_window and [[\<C-y>]] or ""
 	local scroll_input
-  -- if scrolloff or window edge are going to move the cursor for you then only
-  -- scroll the window
-  if
+	-- if scrolloff or window edge are going to move the cursor for you then only
+	-- scroll the window
+	if
 		(
 			(
 				data.last_line_visible
@@ -52,8 +52,8 @@ local function scroll_down(data, scroll_window, scroll_cursor, n_repeat)
 	local cursor_scroll_input = scroll_cursor and string.rep("gj", n) or ""
 	local window_scroll_input = scroll_window and [[\<C-e>]] or ""
 	local scroll_input
-  -- if scrolloff or window edge are going to move the cursor for you then only
-  -- scroll the window
+	-- if scrolloff or window edge are going to move the cursor for you then only
+	-- scroll the window
 	if
 		(
 			(data.first_line_visible and data.win_lines_above_cursor <= utils.get_scrolloff())
@@ -106,16 +106,16 @@ end
 -- Check if the window and the cursor can be scrolled further
 local function who_scrolls(data, move_cursor, direction)
 	local scroll_window, scroll_cursor
-  local half_window = math.floor(data.window_height/2)
+	local half_window = math.floor(data.window_height / 2)
 	scroll_window = not window_reached_limit(data, move_cursor, direction)
 	if not move_cursor then
 		scroll_cursor = false
 	elseif scroll_window then
-    if utils.get_scrolloff() < half_window then
-      scroll_cursor = true
-    else
-      scroll_cursor = false
-    end
+		if utils.get_scrolloff() < half_window then
+			scroll_cursor = true
+		else
+			scroll_cursor = false
+		end
 	elseif opts.cursor_scrolls_alone then
 		scroll_cursor = not cursor_reached_limit(data)
 	else
@@ -253,9 +253,9 @@ function neoscroll.scroll(lines, move_cursor, time, easing_function, info)
 	end
 	-- Check if the window and the cursor are allowed to scroll in that direction
 	local data = utils.get_data()
-  local half_window = math.floor(data.window_height/2)
-  if utils.get_scrolloff() >= half_window then
-    cursor_win_line = half_window
+	local half_window = math.floor(data.window_height / 2)
+	if utils.get_scrolloff() >= half_window then
+		cursor_win_line = half_window
 	elseif data.win_lines_above_cursor <= utils.get_scrolloff() then
 		cursor_win_line = utils.get_scrolloff() + 1
 	elseif data.win_lines_below_cursor <= utils.get_scrolloff() then
@@ -299,10 +299,10 @@ function neoscroll.scroll(lines, move_cursor, time, easing_function, info)
 			-- sets the repeat of the next cycle
 			scroll_timer:set_repeat(next_time_step)
 		end
-    if math.abs(lines_to_scroll) == 0 then
-      stop_scrolling(move_cursor, info)
-      return
-    end
+		if math.abs(lines_to_scroll) == 0 then
+			stop_scrolling(move_cursor, info)
+			return
+		end
 		scroll_one_line(lines_to_scroll, scroll_window, scroll_cursor, data)
 		if math.abs(lines_to_scroll) == 1 then
 			stop_scrolling(move_cursor, info)
