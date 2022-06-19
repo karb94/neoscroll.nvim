@@ -406,8 +406,6 @@ end
 -- Wrapper for zt
 function neoscroll.zt_win(winid, half_screen_time, easing, info)
 	local window_height = vim.api.nvim_win_get_height(winid)
-	-- TODO figure out why this -2 is needed (also needed in master)
-	--      one guess: because scrolloff is -1
 	local win_lines_above_cursor = utils.getwinline(winid) - 1
 	-- Temporary fix for garbage values in local scrolloff when not set
 	local lines = win_lines_above_cursor - utils.get_scrolloff(winid, opts.use_local_scrolloff)
