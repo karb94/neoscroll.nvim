@@ -451,7 +451,7 @@ function neoscroll.zb_win(winid, half_screen_time, easing, info)
 	local corrected_time = math.floor(
 		half_screen_time * (math.abs(lines) / (window_height / 2)) + 0.5
 	)
-	neoscroll.scroll(lines, false, corrected_time, easing, info)
+	neoscroll.scroll_win(winid, lines, false, corrected_time, easing, info)
 end
 
 function neoscroll.zb(half_screen_time, easing, info)
@@ -462,7 +462,7 @@ function neoscroll.G_win(winid, half_screen_time, easing, info)
 	local lines = utils.get_lines_below(winid, utils.getline(winid, "w$"))
 	local window_height = vim.api.nvim_win_get_height(winid)
 	local corrected_time = math.floor(half_screen_time * (math.abs(lines) / (window_height / 2)) + 0.5)
-	neoscroll.scroll(lines, true, corrected_time, easing, { G = true })
+	neoscroll.scroll_win(winid, lines, true, corrected_time, easing, { G = true })
 end
 
 function neoscroll.G(half_screen_time, easing, info)

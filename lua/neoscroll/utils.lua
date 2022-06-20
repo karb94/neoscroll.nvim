@@ -49,7 +49,7 @@ end
 
 function utils.getline(winid, marker)
   if winid == 0 then return vim.fn.line(marker) end
-  return vim.fn.line(marker)
+  return vim.fn.line(marker, winid)
 end
 
 function utils.with_winid(winid, fn)
