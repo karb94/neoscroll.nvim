@@ -139,7 +139,10 @@ local function scroll_one_line(lines_to_scroll, scroll_window, scroll_cursor, da
 	end
 	vim.cmd(scroll(data, scroll_window, scroll_cursor))
 	-- Correct for wrapped lines
-	local lines_behind = math.abs(vim.fn.winline() - cursor_win_line)
+	local lines_behind = vim.fn.winline() - cursor_win_line
+	if lines_to_scroll > 0 then
+		lines_behind = -lines_behind
+	end
 	if scroll_cursor and scroll_window and lines_behind > 0 then
 		vim.cmd(scroll(data, false, scroll_cursor, lines_behind))
 	end
