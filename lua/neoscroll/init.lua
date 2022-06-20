@@ -126,7 +126,7 @@ end
 
 -- Scroll one line in the given direction
 local function scroll_one_line(lines_to_scroll, scroll_window, scroll_cursor, data)
-	local winline_before = vim.fn.winline() -- record for later
+	local winline_before = vim.fn.winline()
 	local curpos_line_before = vim.fn.getcurpos()[2]
 	local scroll
 	local scrolled_lines
@@ -145,8 +145,8 @@ local function scroll_one_line(lines_to_scroll, scroll_window, scroll_cursor, da
 			vim.cmd(scroll(data, false, scroll_cursor, lines_behind))
 		end
 	elseif curpos_line_before == vim.fn.getcurpos()[2] then
-		-- if curpos_line didn't change, we can check it to see if it scroll more
-		-- than it should due to wrapped line
+		-- if curpos_line didn't change, we can use it to get scrolled_lines
+		-- This is more accurate when some lines are wrapped
 		scrolled_lines = winline_before - vim.fn.winline()
 	end
 	relative_line = relative_line + scrolled_lines
