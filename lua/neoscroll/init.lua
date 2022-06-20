@@ -126,23 +126,27 @@ end
 
 -- Scroll one line in the given direction
 local function scroll_one_line(lines_to_scroll, scroll_window, scroll_cursor, data)
+	local winline_before = vim.fn.winline() -- record for later
+	local scroll
+	local scrolled_lines
 	if lines_to_scroll > 0 then
-		relative_line = relative_line + 1
-		vim.cmd(scroll_down(data, scroll_window, scroll_cursor))
-		-- Correct for wrapped lines
-		local lines_behind = cursor_win_line - vim.fn.winline()
-		if scroll_cursor and scroll_window and lines_behind > 0 then
-			vim.cmd(scroll_down(data, false, scroll_cursor, lines_behind))
-		end
+		scrolled_lines = 1
+		scroll = scroll_down
 	else
-		relative_line = relative_line - 1
-		vim.cmd(scroll_up(data, scroll_window, scroll_cursor))
-		-- Correct for wrapped lines
-		local lines_behind = vim.fn.winline() - cursor_win_line
-		if scroll_cursor and scroll_window and lines_behind > 0 then
-			vim.cmd(scroll_up(data, false, scroll_cursor, lines_behind))
-		end
+		scrolled_lines = -1
+		scroll = scroll_up
 	end
+	vim.cmd(scroll(data, scroll_window, scroll_cursor))
+	-- Correct for wrapped lines
+	if scroll_cursor and scroll_window then
+		local lines_behind = math.abs(vim.fn.winline() - cursor_win_line)
+		if lines_behind > 0 then
+			vim.cmd(scroll(data, false, scroll_cursor, lines_behind))
+		end
+	elseif scroll_window then
+		scrolled_lines = winline_before - vim.fn.winline()
+	end
+	relative_line = relative_line + scrolled_lines
 end
 
 -- Scrolling constructor
