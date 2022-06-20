@@ -215,7 +215,7 @@ local function stop_scrolling(winid, move_cursor, info)
 	if opts.post_hook ~= nil then
 		opts.post_hook(info)
 	end
-	local state = WindowState[winid]
+	local state = rawget(WindowState, winid)
 	-- window may be closed mid-scroll, and this would result in nil values
 	if state ~= nil then
 		state.scroll_timer:stop()
