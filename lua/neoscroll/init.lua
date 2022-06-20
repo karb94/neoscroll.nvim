@@ -139,12 +139,11 @@ local function scroll_one_line(lines_to_scroll, scroll_window, scroll_cursor, da
 	end
 	vim.cmd(scroll(data, scroll_window, scroll_cursor))
 	-- Correct for wrapped lines
-	if scroll_cursor and scroll_window then
-		local lines_behind = math.abs(vim.fn.winline() - cursor_win_line)
-		if lines_behind > 0 then
-			vim.cmd(scroll(data, false, scroll_cursor, lines_behind))
-		end
-	elseif curpos_line_before == vim.fn.getcurpos()[2] then
+	local lines_behind = math.abs(vim.fn.winline() - cursor_win_line)
+	if scroll_cursor and scroll_window and lines_behind > 0 then
+		vim.cmd(scroll(data, false, scroll_cursor, lines_behind))
+	end
+	if curpos_line_before == vim.fn.getcurpos()[2] then
 		-- if curpos_line didn't change, we can use it to get scrolled_lines
 		-- This is more accurate when some lines are wrapped
 		scrolled_lines = winline_before - vim.fn.winline()
