@@ -257,7 +257,7 @@ local function callback_safe(fn, winid, move_cursor, info)
 		if not ok then
 			local ok2, err2 = pcall(stop_scrolling, winid, move_cursor, info)
 			if not ok2 then
-				local state = WindowState[winid]
+				local state = rawget(WindowState, winid)
 				if state ~= nil then
 					WindowState[winid].scroll_timer:stop()
 				end
