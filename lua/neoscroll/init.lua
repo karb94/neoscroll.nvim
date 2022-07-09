@@ -330,7 +330,7 @@ end
 -- Wrapper for zz
 function neoscroll.zz(half_screen_time, easing, info)
 	local window_height = vim.api.nvim_win_get_height(0)
-	local lines = vim.fn.winline() - math.floor(window_height / 2 + 1)
+	local lines = vim.fn.winline() - math.ceil(window_height / 2)
 	if lines == 0 then
 		return
 	end
