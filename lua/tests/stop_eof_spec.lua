@@ -1,7 +1,10 @@
+-- print('window height:', vim.api.nvim_win_get_height(0))
+-- print('window width:', vim.api.nvim_win_get_width(0))
+-- print('window line:', vim.fn.winline())
+
 local function scroll_win_cursor()
   local neoscroll = require("neoscroll")
   local time = 100
-  local time_tol = 5
   local lines = 7
   local cursor_start = vim.fn.line(".")
   local window_start = vim.fn.line("w0")
@@ -9,7 +12,7 @@ local function scroll_win_cursor()
 
   -- Scroll forwards
   neoscroll.scroll(lines, true, time)
-  vim.wait(time + time_tol)
+  vim.wait(time + 100)
   cursor_finish = vim.fn.line(".")
   window_finish = vim.fn.line("w0")
   assert.equals(cursor_start + lines, cursor_finish)
@@ -17,7 +20,7 @@ local function scroll_win_cursor()
 
   -- Scroll backwards
   neoscroll.scroll(-lines, true, time)
-  vim.wait(time + time_tol)
+  vim.wait(time + 100)
   cursor_finish = vim.fn.line(".")
   window_finish = vim.fn.line("w0")
   assert.equals(cursor_start, cursor_finish)
@@ -35,7 +38,6 @@ describe("Scrolls properly with", function()
   local neoscroll
   before_each(function()
     neoscroll = require("neoscroll")
-    vim.go.scrolloff = 3
     vim.api.nvim_command('help help | only')
     vim.api.nvim_command('normal M')
   end)
@@ -53,6 +55,4 @@ describe("Scrolls properly with", function()
       end
     end
   end
-
-
 end)
