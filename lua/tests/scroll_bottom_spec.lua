@@ -36,11 +36,11 @@ local motion_opts = {
 }
 
 describe("Scrolls from bottom without scrolloff", function()
-  local neoscroll
+  local neoscroll = require("neoscroll")
+  vim.api.nvim_command('help help | only')
+
   before_each(function()
-    neoscroll = require("neoscroll")
-    vim.api.nvim_command('help help | only')
-    vim.api.nvim_command('normal G')
+    vim.api.nvim_command('normal ggG')
   end)
 
   for opt1, val1 in pairs(motion_opts) do
@@ -59,12 +59,12 @@ describe("Scrolls from bottom without scrolloff", function()
 end)
 
 describe("Scrolls from bottom with scrolloff", function()
-  local neoscroll
+  local neoscroll = require("neoscroll")
+  vim.go.scrolloff = 3
+  vim.api.nvim_command('help help | only')
+
   before_each(function()
-    neoscroll = require("neoscroll")
-    vim.go.scrolloff = 3
-    vim.api.nvim_command('help help | only')
-    vim.api.nvim_command('normal G')
+    vim.api.nvim_command('normal ggG')
   end)
 
   for opt1, val1 in pairs(motion_opts) do

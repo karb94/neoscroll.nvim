@@ -1,1 +1,2 @@
 set rtp^=../..
+set rtp^=.

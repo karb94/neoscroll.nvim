@@ -35,10 +35,10 @@ local motion_opts = {
 }
 
 describe("Scrolls from top without scrolloff", function()
-  local neoscroll
+  local neoscroll = require("neoscroll")
+  vim.api.nvim_command('help help | only')
+
   before_each(function()
-    neoscroll = require("neoscroll")
-    vim.api.nvim_command('help help | only')
     vim.api.nvim_command('normal gg')
   end)
 
@@ -58,59 +58,12 @@ describe("Scrolls from top without scrolloff", function()
 end)
 
 describe("Scrolls from top with scrolloff", function()
-  local neoscroll
+  local neoscroll = require("neoscroll")
+  vim.go.scrolloff = 3
+  vim.api.nvim_command('help help | only')
+
   before_each(function()
-    neoscroll = require("neoscroll")
-    vim.go.scrolloff = 3
-    vim.api.nvim_command('help help | only')
     vim.api.nvim_command('normal gg')
-  end)
-
-  for opt1, val1 in pairs(motion_opts) do
-    local custom_opts = {[opt1] = val1}
-    for opt2, val2 in pairs(motion_opts) do
-      custom_opts[opt2] = val2
-      for opt3, val3 in pairs(motion_opts) do
-        custom_opts[opt3]  = val3
-        it(vim.inspect(custom_opts), function()
-          neoscroll.setup(custom_opts)
-          scroll_win_cursor(vim.go.scrolloff ~= 0)
-        end)
-      end
-    end
-  end
-end)
-
-describe("Scrolls from bottom without scrolloff", function()
-  local neoscroll
-  before_each(function()
-    neoscroll = require("neoscroll")
-    vim.api.nvim_command('help help | only')
-    vim.api.nvim_command('normal G')
-  end)
-
-  for opt1, val1 in pairs(motion_opts) do
-    local custom_opts = {[opt1] = val1}
-    for opt2, val2 in pairs(motion_opts) do
-      custom_opts[opt2] = val2
-      for opt3, val3 in pairs(motion_opts) do
-        custom_opts[opt3]  = val3
-        it(vim.inspect(custom_opts), function()
-          neoscroll.setup(custom_opts)
-          scroll_win_cursor(vim.go.scrolloff ~= 0)
-        end)
-      end
-    end
-  end
-end)
-
-describe("Scrolls from bottom with scrolloff", function()
-  local neoscroll
-  before_each(function()
-    neoscroll = require("neoscroll")
-    vim.go.scrolloff = 3
-    vim.api.nvim_command('help help | only')
-    vim.api.nvim_command('normal G')
   end)
 
   for opt1, val1 in pairs(motion_opts) do

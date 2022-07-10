@@ -32,12 +32,12 @@ local motion_opts = {
 
 
 describe("Scrolls properly with", function()
-  local neoscroll
+  local neoscroll = require("neoscroll")
+  vim.go.scrolloff = 3
+  vim.api.nvim_command('help help | only')
+
   before_each(function()
-    neoscroll = require("neoscroll")
-    vim.go.scrolloff = 3
-    vim.api.nvim_command('help help | only')
-    vim.api.nvim_command('normal M')
+    vim.api.nvim_command('normal ggM')
   end)
 
   for opt1, val1 in pairs(motion_opts) do
