@@ -85,4 +85,13 @@ function utils.get_lines_from_win_fraction(fraction)
 	return lines
 end
 
+function utils.get_scrolloff()
+  local window_scrolloff = vim.wo.scrolloff
+  if window_scrolloff == -1 then
+    return vim.go.scrolloff
+  else
+    return window_scrolloff
+  end
+end
+
 return utils

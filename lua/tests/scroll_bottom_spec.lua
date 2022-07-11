@@ -61,7 +61,6 @@ end)
 describe("Scrolls from bottom with scrolloff", function()
   local neoscroll = require("neoscroll")
   vim.go.scrolloff = 3
-  vim.api.nvim_command('help help | only')
 
   before_each(function()
     vim.api.nvim_command('normal ggG')

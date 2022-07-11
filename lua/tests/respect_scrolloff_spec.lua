@@ -2,7 +2,6 @@ describe("When BOF is reached", function()
   local neoscroll, cursor_start, cursor_finish, window_start, window_finish
   local time = 100
   local time_tol = 5
-  local lines = 7
   local opts = {stop_eof = true, cursor_scrolls_alone = true}
   neoscroll = require("neoscroll")
   vim.api.nvim_command('help help | only')
@@ -79,8 +78,8 @@ describe("When EOF is reached", function()
   local opts = {stop_eof = true, cursor_scrolls_alone = true}
   local last_line = vim.fn.line("$")
   local lines
+  vim.wo.scrolloff = -1
   neoscroll = require("neoscroll")
-  vim.api.nvim_command('help help | only')
 
   before_each(function()
     vim.api.nvim_command('normal ggGM')
@@ -104,7 +103,7 @@ describe("When EOF is reached", function()
     assert.equals(window_start, window_finish)
   end)
 
-  it("should scroll cursor till top when respect_scrolloff==true and go.scrolloff==0", function()
+  it("should scroll cursor till bottom when respect_scrolloff==true and go.scrolloff==0", function()
     local scrolloff = 0
     vim.go.scrolloff = scrolloff
     opts.respect_scrolloff = true
@@ -154,8 +153,8 @@ describe("When beyond EOF", function()
   local time_tol = 5
   local opts = {stop_eof = true, cursor_scrolls_alone = true}
   local lines = vim.fn.winheight(0)
+  vim.wo.scrolloff = -1
   neoscroll = require("neoscroll")
-  vim.api.nvim_command('help help | only')
   local last_line = vim.fn.line("$")
 
   before_each(function()
