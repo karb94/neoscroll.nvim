@@ -1,7 +1,9 @@
 local utils = {}
 
 -- Helper function to check if a number is a float
-function utils.is_float(n) return math.floor(math.abs(n)) ~= math.abs(n) end
+function utils.is_float(n)
+  return math.floor(math.abs(n)) ~= math.abs(n)
+end
 
 function utils.get_lines_above(winid, line)
   if winid ~= 0 then
@@ -11,12 +13,16 @@ function utils.get_lines_above(winid, line)
   end
   local lines_above = 0
   local first_folded_line = vim.fn.foldclosed(line)
-  if first_folded_line ~= -1 then line = first_folded_line end
+  if first_folded_line ~= -1 then
+    line = first_folded_line
+  end
   while line > 1 do
     lines_above = lines_above + 1
     line = line - 1
     first_folded_line = vim.fn.foldclosed(line)
-    if first_folded_line ~= -1 then line = first_folded_line end
+    if first_folded_line ~= -1 then
+      line = first_folded_line
+    end
   end
   return lines_above
 end
@@ -30,25 +36,35 @@ function utils.get_lines_below(winid, line)
   local last_line = vim.fn.line("$")
   local lines_below = 0
   local last_folded_line = vim.fn.foldclosedend(line)
-  if last_folded_line ~= -1 then line = last_folded_line end
+  if last_folded_line ~= -1 then
+    line = last_folded_line
+  end
   while line < last_line do
     lines_below = lines_below + 1
     line = line + 1
     last_folded_line = vim.fn.foldclosedend(line)
-    if last_folded_line ~= -1 then line = last_folded_line end
+    if last_folded_line ~= -1 then
+      line = last_folded_line
+    end
   end
   return lines_below
 end
 
-function utils.getwinline(winid) return utils.with_winid(winid, vim.fn.winline) end
+function utils.getwinline(winid)
+  return utils.with_winid(winid, vim.fn.winline)
+end
 
 function utils.getline(winid, marker)
-  if winid == 0 then return vim.fn.line(marker) end
+  if winid == 0 then
+    return vim.fn.line(marker)
+  end
   return vim.fn.line(marker)
 end
 
 function utils.getline(winid, marker)
-  if winid == 0 then return vim.fn.line(marker) end
+  if winid == 0 then
+    return vim.fn.line(marker)
+  end
   return vim.fn.line(marker, winid)
 end
 
@@ -75,8 +91,7 @@ function utils.get_data(winid)
   data.win_lines_below_cursor = data.window_height - data.cursor_win_line
   data.win_lines_above_cursor = data.cursor_win_line - 1
   if data.last_line_visible then
-    data.lines_below_cursor = utils.get_lines_below(winid,
-                                                    utils.getline(winid, "."))
+    data.lines_below_cursor = utils.get_lines_below(winid, utils.getline(winid, "."))
   end
   return data
 end
@@ -109,9 +124,13 @@ function utils.get_lines_from_win_fraction(winid, fraction)
 end
 
 function utils.get_scrolloff(winid, respect_local)
-  if not respect_local then return vim.go.scrolloff end
+  if not respect_local then
+    return vim.go.scrolloff
+  end
   local win_scrolloff = vim.api.nvim_win_get_option(winid, "scrolloff")
-  if win_scrolloff == -1 then return vim.go.scrolloff end
+  if win_scrolloff == -1 then
+    return vim.go.scrolloff
+  end
   return win_scrolloff
 end
 
