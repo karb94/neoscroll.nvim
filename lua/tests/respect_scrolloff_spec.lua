@@ -64,6 +64,7 @@ describe("When BOF is reached", function()
       vim.go.scrolloff = 0
       vim.wo.scrolloff = scrolloff
       opts.respect_scrolloff = true
+      opts.use_local_scrolloff = true
       neoscroll.setup(opts)
       -- scroll forwards
       neoscroll.scroll(-(cursor_start - 1), true, time)
