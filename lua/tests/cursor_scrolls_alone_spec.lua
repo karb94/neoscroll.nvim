@@ -4,10 +4,10 @@ describe("When EOF is reached", function()
   local time_tol = 5
   local lines = 7
   neoscroll = require("neoscroll")
-  vim.api.nvim_command('help help | only')
+  vim.api.nvim_command("help help | only")
 
   before_each(function()
-    vim.api.nvim_command('normal ggGM')
+    vim.api.nvim_command("normal ggGM")
     time = 100
     time_tol = 5
     lines = 7
@@ -16,7 +16,7 @@ describe("When EOF is reached", function()
   end)
 
   it("should scroll cursor when cursor_scrolls_alone==true", function()
-    neoscroll.setup({stop_eof = true, cursor_scrolls_alone = true})
+    neoscroll.setup({ stop_eof = true, cursor_scrolls_alone = true })
     -- Scroll forwards
     -- print('window line:', vim.fn.winline())
     neoscroll.scroll(lines, true, time)
@@ -29,7 +29,7 @@ describe("When EOF is reached", function()
   end)
 
   it("should not scroll cursor when cursor_scrolls_alone==false", function()
-    neoscroll.setup({stop_eof = true, cursor_scrolls_alone = false})
+    neoscroll.setup({ stop_eof = true, cursor_scrolls_alone = false })
     -- Scroll forwards
     neoscroll.scroll(lines, true, time)
     vim.wait(time + time_tol)
@@ -38,5 +38,4 @@ describe("When EOF is reached", function()
     assert.equals(cursor_start, cursor_finish)
     assert.equals(window_start, window_finish)
   end)
-
 end)

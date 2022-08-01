@@ -23,9 +23,9 @@ local function scroll_win_cursor(scrolloff)
   cursor_finish = vim.fn.line(".")
   window_finish = vim.fn.line("w0")
   assert.equals(window_start, window_finish)
-if not scrolloff then
-  assert.equals(cursor_start, cursor_finish)
-end
+  if not scrolloff then
+    assert.equals(cursor_start, cursor_finish)
+  end
 end
 
 local motion_opts = {
@@ -36,18 +36,18 @@ local motion_opts = {
 
 describe("Scrolls from top without scrolloff", function()
   local neoscroll = require("neoscroll")
-  vim.api.nvim_command('help help | only')
+  vim.api.nvim_command("help help | only")
 
   before_each(function()
-    vim.api.nvim_command('normal gg')
+    vim.api.nvim_command("normal gg")
   end)
 
   for opt1, val1 in pairs(motion_opts) do
-    local custom_opts = {[opt1] = val1}
+    local custom_opts = { [opt1] = val1 }
     for opt2, val2 in pairs(motion_opts) do
       custom_opts[opt2] = val2
       for opt3, val3 in pairs(motion_opts) do
-        custom_opts[opt3]  = val3
+        custom_opts[opt3] = val3
         it(vim.inspect(custom_opts), function()
           neoscroll.setup(custom_opts)
           scroll_win_cursor(vim.go.scrolloff ~= 0)
@@ -62,15 +62,15 @@ describe("Scrolls from top with scrolloff", function()
   vim.go.scrolloff = 3
 
   before_each(function()
-    vim.api.nvim_command('normal gg')
+    vim.api.nvim_command("normal gg")
   end)
 
   for opt1, val1 in pairs(motion_opts) do
-    local custom_opts = {[opt1] = val1}
+    local custom_opts = { [opt1] = val1 }
     for opt2, val2 in pairs(motion_opts) do
       custom_opts[opt2] = val2
       for opt3, val3 in pairs(motion_opts) do
-        custom_opts[opt3]  = val3
+        custom_opts[opt3] = val3
         it(vim.inspect(custom_opts), function()
           neoscroll.setup(custom_opts)
           scroll_win_cursor(vim.go.scrolloff ~= 0)
