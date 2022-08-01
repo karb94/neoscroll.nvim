@@ -37,6 +37,17 @@ local WindowState = {
 }
 setmetatable(WindowState, WindowState)
 
+local function execute_nvim_cmd (cmd, options)
+  if vim.fn.has('nvim-0.8') == 1 then
+    return vim.api.nvim_cmd(cmd, options)
+  else
+    local command = string.format(
+      "%s%s %s", cmd.cmd, cmd.bang and "!" or "", table.concat(cmd.args)
+    )
+    return vim.api.nvim_exec(command, options.output or false)
+  end
+end
+
 -- excecute commands to scroll screen [and cursor] up/down one line
 -- The bang (!) `normal!` in normal ignores mappings
 local function scroll_up(state, scroll_window, scroll_cursor, n_repeat)
@@ -62,7 +73,7 @@ local function scroll_up(state, scroll_window, scroll_cursor, n_repeat)
   end
   utils.with_winid(state.winid, function()
     local escaped = vim.api.nvim_replace_termcodes(scroll_input, true, true, true)
-    vim.api.nvim_cmd({ cmd = "normal", bang = true, args = { escaped } }, { output = false })
+    execute_nvim_cmd({ cmd = "normal", bang = true, args = { escaped } }, { output = false })
   end)
 end
 
@@ -86,7 +97,7 @@ local function scroll_down(state, scroll_window, scroll_cursor, n_repeat)
   end
   utils.with_winid(state.winid, function()
     local escaped = vim.api.nvim_replace_termcodes(scroll_input, true, true, true)
-    vim.api.nvim_cmd({ cmd = "normal", bang = true, args = { escaped } }, { output = false })
+    execute_nvim_cmd({ cmd = "normal", bang = true, args = { escaped } }, { output = false })
   end)
 end
 
