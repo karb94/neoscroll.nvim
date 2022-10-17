@@ -224,6 +224,7 @@ local neoscroll = {}
 -- move_cursor: scroll the window and the cursor simultaneously
 -- easing_function: name of the easing function to use for the scrolling animation
 function neoscroll.scroll(lines, move_cursor, time, easing_function, info)
+	time = time * config.options.time_scale
 	-- If lines is a fraction of the window transform it to lines
 	if utils.is_float(lines) then
 		lines = utils.get_lines_from_win_fraction(lines)
