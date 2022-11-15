@@ -5,6 +5,7 @@ config.options = {
 	hide_cursor = true,
 	stop_eof = true,
 	respect_scrolloff = false,
+  scroll_past_bottom = true,
 	cursor_scrolls_alone = true,
 	performance_mode = false,
 }
