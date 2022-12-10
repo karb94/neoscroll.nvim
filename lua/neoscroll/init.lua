@@ -71,7 +71,7 @@ end
 local function window_reached_limit(data, move_cursor, direction)
 	if data.last_line_visible and direction > 0 then
 		if move_cursor then
-			if opts.stop_eof and data.lines_below_cursor == data.win_lines_below_cursor then
+			if opts.stop_eof and data.last_line - data.win_top_line < data.window_height then
 				return true
 			elseif opts.respect_scrolloff and data.lines_below_cursor <= utils.get_scrolloff() then
 				return true
