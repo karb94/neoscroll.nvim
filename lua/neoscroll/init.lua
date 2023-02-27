@@ -137,7 +137,11 @@ local function scroll_one_line(lines_to_scroll, scroll_window, scroll_cursor, da
 		scrolled_lines = -1
 		scroll = scroll_up
 	end
-	vim.cmd(scroll(data, scroll_window, scroll_cursor))
+	local scroll_command = scroll(data, scroll_window, scroll_cursor)
+	local sucess, _ = pcall(vim.cmd, scroll_command)
+	if not sucess then
+		return false
+	end
 	-- Correct for wrapped lines
 	local lines_behind = vim.fn.winline() - cursor_win_line
 	if lines_to_scroll > 0 then
@@ -152,6 +156,7 @@ local function scroll_one_line(lines_to_scroll, scroll_window, scroll_cursor, da
 		scrolled_lines = winline_before - vim.fn.winline()
 	end
 	relative_line = relative_line + scrolled_lines
+	return true
 end
 
 -- Scrolling constructor
@@ -283,8 +288,8 @@ function neoscroll.scroll(lines, move_cursor, time, easing_function, info)
 	local ef = easing_function and easing_function or opts.easing_function
 
 	local lines_to_scroll = math.abs(relative_line - target_line)
-	scroll_one_line(lines, scroll_window, scroll_cursor, data)
-	if lines_to_scroll == 1 then
+	local success = scroll_one_line(lines, scroll_window, scroll_cursor, data)
+	if lines_to_scroll == 1 or not success then
 		stop_scrolling(move_cursor, info)
 	end
 	local time_step = compute_time_step(lines_to_scroll, lines, time, ef)
@@ -312,8 +317,8 @@ function neoscroll.scroll(lines, move_cursor, time, easing_function, info)
 			stop_scrolling(move_cursor, info)
 			return
 		end
-		scroll_one_line(lines_to_scroll, scroll_window, scroll_cursor, data)
-		if math.abs(lines_to_scroll) == 1 then
+		success = scroll_one_line(lines_to_scroll, scroll_window, scroll_cursor, data)
+		if math.abs(lines_to_scroll) == 1 or not success then
 			stop_scrolling(move_cursor, info)
 			return
 		end
