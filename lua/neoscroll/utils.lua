@@ -51,9 +51,13 @@ function utils.get_data()
 	data.first_line_visible = data.win_top_line == 1
 	data.last_line_visible = data.win_bottom_line == data.last_line
 	data.window_height = vim.api.nvim_win_get_height(0)
+  if vim.opt.winbar ~= "" then
+    data.window_height = data.window_height - 1
+  end
 	data.cursor_win_line = vim.fn.winline()
 	data.win_lines_below_cursor = data.window_height - data.cursor_win_line
 	data.win_lines_above_cursor = data.cursor_win_line - 1
+  data.win_bottom_line_eof = data.lines_below_cursor == data.win_lines_below_cursor
 	if data.last_line_visible then
 		data.lines_below_cursor = utils.get_lines_below(vim.fn.line("."))
 	end
