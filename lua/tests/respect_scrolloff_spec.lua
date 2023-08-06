@@ -151,7 +151,7 @@ describe("When beyond EOF", function()
   local neoscroll, cursor_start, cursor_finish, window_start, window_finish
   local time = 100
   local time_tol = 5
-  local opts = {stop_eof = true, cursor_scrolls_alone = true}
+  local opts = {stop_eof = false, cursor_scrolls_alone = true}
   local lines = vim.fn.winheight(0)
   vim.wo.scrolloff = -1
   neoscroll = require("neoscroll")
@@ -178,7 +178,7 @@ describe("When beyond EOF", function()
     assert.equals(window_start + (cursor_finish - cursor_start) , window_finish)
   end)
 
-  it("should scroll cursor till top when respect_scrolloff==true and go.scrolloff==0", function()
+  it("should scroll cursor till bottom when respect_scrolloff==true and go.scrolloff==0", function()
     local scrolloff = 0
     vim.go.scrolloff = scrolloff
     opts.respect_scrolloff = true

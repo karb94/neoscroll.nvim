@@ -71,7 +71,7 @@ end
 local function window_reached_limit(data, move_cursor, direction)
 	if data.last_line_visible and direction > 0 then
 		if move_cursor then
-			if opts.stop_eof and data.lines_below_cursor == data.win_lines_below_cursor then
+      if opts.stop_eof and data.last_line_visible then
 				return true
 			elseif opts.respect_scrolloff and data.lines_below_cursor <= utils.get_scrolloff() then
 				return true
@@ -89,8 +89,8 @@ local function window_reached_limit(data, move_cursor, direction)
 end
 
 -- Cursor rules for when to stop scrolling
-local function cursor_reached_limit(data)
-	if data.first_line_visible then
+local function cursor_reached_limit(data, direction)
+	if data.first_line_visible and direction < 0 then
 		if opts.respect_scrolloff and data.win_lines_above_cursor <= utils.get_scrolloff() then
 			return true
 		end
@@ -117,7 +117,7 @@ local function who_scrolls(data, move_cursor, direction)
 			scroll_cursor = false
 		end
 	elseif opts.cursor_scrolls_alone then
-		scroll_cursor = not cursor_reached_limit(data)
+		scroll_cursor = not cursor_reached_limit(data, direction)
 	else
 		scroll_cursor = false
 	end
