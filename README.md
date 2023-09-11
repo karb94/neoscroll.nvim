@@ -22,6 +22,15 @@ You will need neovim 0.5 for this plugin to work. Install it using your favorite
 
 - With [vim-plug](https://github.com/junegunn/vim-plug): `Plug 'karb94/neoscroll.nvim'`
 
+- With [lazy.nvim](https://github.com/folke/lazy.nvim), create the file `~/.config/nvim/lua/plugins/neoscroll.lua`:
+    ```Lua
+    return {
+      "karb94/neoscroll.nvim",
+      config = function ()
+        require('neoscroll').setup {}
+      end
+    }
+    ```
 
 ## Quickstart
 Add the `setup()` function to your init file.
