@@ -51,7 +51,7 @@ describe("Scrolls from bottom without scrolloff", function()
         custom_opts[opt3]  = val3
         it(vim.inspect(custom_opts), function()
           neoscroll.setup(custom_opts)
-          scroll_win_cursor(vim.go.scrolloff ~= 0)
+          scroll_win_cursor(vim.wo.scrolloff ~= 0)
         end)
       end
     end
@@ -60,7 +60,7 @@ end)
 
 describe("Scrolls from bottom with scrolloff", function()
   local neoscroll = require("neoscroll")
-  vim.go.scrolloff = 3
+  vim.wo.scrolloff = 3
 
   before_each(function()
     vim.api.nvim_command('normal ggG')
@@ -74,7 +74,7 @@ describe("Scrolls from bottom with scrolloff", function()
         custom_opts[opt3]  = val3
         it(vim.inspect(custom_opts), function()
           neoscroll.setup(custom_opts)
-          scroll_win_cursor(vim.go.scrolloff ~= 0)
+          scroll_win_cursor(vim.wo.scrolloff ~= 0)
         end)
       end
     end
