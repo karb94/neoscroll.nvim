@@ -338,7 +338,7 @@ function neoscroll.zt(half_screen_time, easing, info)
 end
 -- Wrapper for zz
 function neoscroll.zz(half_screen_time, easing, info)
-	local window_height = vim.api.nvim_win_get_height(0)
+	local window_height = vim.fn.winheight(0)
 	local lines = vim.fn.winline() - math.ceil(window_height / 2)
 	if lines == 0 then
 		return
@@ -348,7 +348,7 @@ function neoscroll.zz(half_screen_time, easing, info)
 end
 -- Wrapper for zb
 function neoscroll.zb(half_screen_time, easing, info)
-	local window_height = vim.api.nvim_win_get_height(0)
+	local window_height = vim.fn.winheight(0)
 	local lines_below_cursor = window_height - vim.fn.winline()
 	-- Temporary fix for garbage values in local scrolloff when not set
 	local lines = -lines_below_cursor + utils.get_scrolloff()
@@ -361,7 +361,7 @@ end
 
 function neoscroll.G(half_screen_time, easing, info)
 	local lines = utils.get_lines_below(vim.fn.line("w$"))
-	local window_height = vim.api.nvim_win_get_height(0)
+	local window_height = vim.fn.winheight(0)
 	local cursor_win_line = vim.fn.winline()
 	local win_lines_below_cursor = window_height - cursor_win_line
 	local corrected_time = math.floor(half_screen_time * (math.abs(lines) / (window_height / 2)) + 0.5)
@@ -370,7 +370,7 @@ end
 
 function neoscroll.gg(half_screen_time, easing, info)
 	local lines = utils.get_lines_above(vim.fn.line("w0"))
-	local window_height = vim.api.nvim_win_get_height(0)
+	local window_height = vim.fn.winheight(0)
 	local cursor_win_line = vim.fn.winline()
 	lines = -lines - cursor_win_line
 	local corrected_time = math.floor(half_screen_time * (math.abs(lines) / (window_height / 2)) + 0.5)

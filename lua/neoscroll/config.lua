@@ -39,8 +39,8 @@ local function generate_default_mappings(custom_mappings)
 	local defaults = {}
 	defaults["<C-u>"] = { "scroll", { "-vim.wo.scroll", "true", "250" } }
 	defaults["<C-d>"] = { "scroll", { "vim.wo.scroll", "true", "250" } }
-	defaults["<C-b>"] = { "scroll", { "-vim.api.nvim_win_get_height(0)", "true", "450" } }
-	defaults["<C-f>"] = { "scroll", { "vim.api.nvim_win_get_height(0)", "true", "450" } }
+	defaults["<C-b>"] = { "scroll", { "-vim.fn.winheight(0)", "true", "450" } }
+	defaults["<C-f>"] = { "scroll", { "vim.fn.winheight(0)", "true", "450" } }
 	defaults["<C-y>"] = { "scroll", { "-0.10", "false", "100" } }
 	defaults["<C-e>"] = { "scroll", { "0.10", "false", "100" } }
 	defaults["zt"] = { "zt", { "250" } }
