@@ -7,6 +7,7 @@ config.options = {
 	respect_scrolloff = false,
 	cursor_scrolls_alone = true,
 	performance_mode = false,
+	time_scale = 1.0,
 }
 
 function config.set_options(custom_opts)
