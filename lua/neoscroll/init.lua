@@ -150,12 +150,22 @@ local function scroll_one_line(lines_to_scroll, scroll_window, scroll_cursor, da
 	if scroll_cursor and scroll_window and lines_behind > 0 then
 		vim.cmd(scroll(data, false, scroll_cursor, lines_behind))
 	end
+  -- If initial_cursor_line didn't change, we can use it to get scrolled_lines
+  -- This is more accurate when some lines are wrapped
 	if initial_cursor_line == vim.api.nvim_win_get_cursor(0)[1] then
-		-- if initial_cursor_line didn't change, we can use it to get scrolled_lines
-		-- This is more accurate when some lines are wrapped
 		scrolled_lines = winline_before - vim.fn.winline()
 	end
-	relative_line = relative_line + scrolled_lines
+  -- If we have past our target line (e.g. when forced by  wrapped lines) set lines_to_scroll
+  -- to 1 to trigger stop_scrolling(). Otherwise it will start scrolling backwards and
+  -- potentially run into an infinite loop
+  local new_relative_line = relative_line + scrolled_lines
+  local new_lines_to_scroll = target_line - new_relative_line
+  local target_overshot = lines_to_scroll * new_lines_to_scroll < 0
+	if target_overshot then
+    lines_to_scroll = 1
+  else
+    relative_line = relative_line + scrolled_lines
+  end
 	return true
 end
 
