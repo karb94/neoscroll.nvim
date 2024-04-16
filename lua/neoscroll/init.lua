@@ -29,21 +29,21 @@ local function scroll_up(data, scroll_window, scroll_cursor, n_repeat)
 	local cursor_scroll_input = scroll_cursor and string.rep("gk", n) or ""
 	local window_scroll_input = scroll_window and [[\<C-y>]] or ""
 	local scroll_input
-	-- if scrolloff or window edge are going to move the cursor for you then only
-	-- scroll the window
-	if
-		(
-			(
-				data.last_line_visible
-				and data.win_lines_below_cursor == data.lines_below_cursor
-				and data.lines_below_cursor <= utils.get_scrolloff()
-			) or data.win_lines_below_cursor == utils.get_scrolloff()
-		) and scroll_window
+  local scrolloff = utils.get_scrolloff()
+  local cursor_within_scrolloff
+  if data.last_line_visible then
+    cursor_within_scrolloff = data.win_bottom_line_eof and data.win_lines_below_cursor <= scrolloff
+  else
+    cursor_within_scrolloff = data.win_lines_below_cursor <= scrolloff
+  end
+	if scroll_window
 	then
-		scroll_input = window_scroll_input
-	else
-		scroll_input = window_scroll_input .. cursor_scroll_input
-	end
+    -- When cursor is within scrolloff it will be forced to move so no need to move it ourselves
+    scroll_input = cursor_within_scrolloff and window_scroll_input or
+        window_scroll_input .. cursor_scroll_input
+  else
+    scroll_input = cursor_scroll_input
+  end
 	return [[exec "normal! ]] .. scroll_input .. [["]]
 end
 

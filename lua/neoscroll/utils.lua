@@ -22,6 +22,7 @@ function utils.get_lines_above(line)
 	return lines_above
 end
 
+-- Calculate lines below the cursor till the EOF skipping folded lines
 function utils.get_lines_below(line)
 	local last_line = vim.fn.line("$")
 	local lines_below = 0
@@ -54,10 +55,13 @@ function utils.get_data()
 	data.cursor_win_line = vim.fn.winline()
 	data.win_lines_below_cursor = data.window_height - data.cursor_win_line
 	data.win_lines_above_cursor = data.cursor_win_line - 1
-  data.win_bottom_line_eof = data.lines_below_cursor == data.win_lines_below_cursor
-	if data.last_line_visible then
-		data.lines_below_cursor = utils.get_lines_below(vim.fn.line("."))
-	end
+  if data.last_line_visible then
+    data.lines_below_cursor = utils.get_lines_below(vim.fn.line("."))
+    data.win_bottom_line_eof = data.lines_below_cursor == data.win_lines_below_cursor
+  else
+    data.lines_below_cursor = data.win_lines_below_cursor
+    data.win_bottom_line_eof = false
+  end
 	return data
 end
 
