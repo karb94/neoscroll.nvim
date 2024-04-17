@@ -1,7 +1,6 @@
 local config = require("neoscroll.config")
 local utils = require("neoscroll.utils")
 local opts
-local so_scope
 
 local scroll_timer = vim.loop.new_timer()
 local target_line = 0
@@ -9,17 +8,13 @@ local relative_line = 0
 local cursor_win_line
 local scrolling = false
 local continuous_scroll = false
+
 -- Highlight group to hide the cursor
-vim.api.nvim_exec(
-	[[
-augroup custom_highlight
-autocmd!
-autocmd ColorScheme * highlight NeoscrollHiddenCursor gui=reverse blend=100
-augroup END
-]],
-	true
-)
-vim.cmd("highlight NeoscrollHiddenCursor gui=reverse blend=100")
+local hl_callback = function()
+  vim.api.nvim_set_hl(0, "NeoscrollHiddenCursor", { reverse=true, blend=100 })
+end
+hl_callback()
+vim.api.nvim_create_autocmd({"ColorScheme"},{ pattern={"*"}, callback = hl_callback })
 
 -- excecute commands to scroll screen [and cursor] up/down one line
 -- `execute` is necessary to allow the use of special characters like <C-y>
