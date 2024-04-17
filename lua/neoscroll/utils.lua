@@ -1,5 +1,19 @@
 local utils = {}
 
+---@class Data
+---@field win_top_line integer Line number of the topmost line of the window
+---@field win_bottom_line integer Line number of the bottommost line of the window
+---@field last_line integer Last line of the file
+---@field first_line_visible boolean First line is visible in the window
+---@field last_line_visible boolean Last line is visible in the window
+---@field window_height integer Height of the window
+---@field cursor_win_line integer Row number of the cursor position in the window
+---@field win_lines_below_cursor integer Number of window rows below the cursor
+---@field win_lines_above_cursor integer Number of window rows above the cursor
+---@field lines_below_cursor integer Number of lines below the cursor until the end of file or window
+---@field win_bottom_line_eof boolean Bottommost line of the window is the last line of the file
+
+
 -- Helper function to check if a number is a float
 function utils.is_float(n)
 	return math.floor(math.abs(n)) ~= math.abs(n)
@@ -44,6 +58,7 @@ end
 -- Collect all the necessary window, buffer and cursor data
 -- vim.fn.line("w0") -> if there's a fold returns first line of fold
 -- vim.fn.line("w$") -> if there's a fold returns last line of fold
+---@return Data
 function utils.get_data()
 	local data = {}
 	data.win_top_line = vim.fn.line("w0")
