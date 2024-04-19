@@ -393,7 +393,8 @@ function neoscroll.G(half_screen_time, easing_name, info)
   local win_lines_below_cursor = window_height - cursor_win_line
   local corrected_time =
     math.floor(half_screen_time * (math.abs(lines) / (window_height / 2)) + 0.5)
-  neoscroll.scroll(lines, true, corrected_time, easing_name, { G = true })
+  info.G = true
+  neoscroll.scroll(lines, true, corrected_time, easing_name, info)
 end
 
 ---Emulates `gg` motion
