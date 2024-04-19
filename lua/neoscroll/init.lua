@@ -323,7 +323,7 @@ function neoscroll.scroll(lines, move_cursor, time, easing_name, info)
       stop_scrolling(move_cursor, info)
       return
     end
-    success = scroll_one_line(lines_to_scroll, window_scrolls, cursor_scrolls, data)
+    success = scroll_one_line(lines_to_scroll, window_scrolls, cursor_scrolls)
     if math.abs(lines_to_scroll) == 1 or not success then
       stop_scrolling(move_cursor, info)
       return
