@@ -8,6 +8,8 @@ local relative_line = 0
 local cursor_win_line
 local scrolling = false
 local continuous_scroll = false
+local ctrl_y = vim.api.nvim_replace_termcodes("<C-y>", false, false, true)
+local ctrl_e = vim.api.nvim_replace_termcodes("<C-e>", false, false, true)
 
 -- Highlight group to hide the cursor
 local hl_callback = function()
@@ -16,62 +18,6 @@ end
 hl_callback()
 vim.api.nvim_create_autocmd({"ColorScheme"},{ pattern={"*"}, callback = hl_callback })
 
--- excecute commands to scroll screen [and cursor] up/down one line
--- `execute` is necessary to allow the use of special characters like <C-y>
--- The bang (!) `normal!` in normal ignores mappings
----@param data table
----@param scroll_window boolean
----@param scroll_cursor boolean
----@param n_repeat integer
----@return string
-local function scroll_up(data, scroll_window, scroll_cursor, n_repeat)
-	local n = n_repeat == nil and 1 or n_repeat
-	local cursor_scroll_input = scroll_cursor and string.rep("gk", n) or ""
-	local window_scroll_input = scroll_window and [[\<C-y>]] or ""
-	local scroll_input
-  local scrolloff = utils.get_scrolloff()
-  local cursor_within_scrolloff
-  if data.last_line_visible then
-    cursor_within_scrolloff = data.win_bottom_line_eof and data.win_lines_below_cursor <= scrolloff
-  else
-    cursor_within_scrolloff = data.win_lines_below_cursor <= scrolloff
-  end
-	if scroll_window
-	then
-    -- When cursor is within scrolloff it will be forced to move so no need to move it ourselves
-    scroll_input = cursor_within_scrolloff and window_scroll_input or
-        window_scroll_input .. cursor_scroll_input
-  else
-    scroll_input = cursor_scroll_input
-  end
-	return [[exec "normal! ]] .. scroll_input .. [["]]
-end
-
-
----@param data table
----@param scroll_window boolean
----@param scroll_cursor boolean
----@param n_repeat integer
----@return string
-local function scroll_down(data, scroll_window, scroll_cursor, n_repeat)
-	local n = n_repeat == nil and 1 or n_repeat
-	local cursor_scroll_input = scroll_cursor and string.rep("gj", n) or ""
-	local window_scroll_input = scroll_window and [[\<C-e>]] or ""
-	local scroll_input
-	-- if scrolloff or window edge are going to move the cursor for you then only
-	-- scroll the window
-	if
-		(
-			(data.first_line_visible and data.win_lines_above_cursor <= utils.get_scrolloff())
-			or data.win_lines_above_cursor <= utils.get_scrolloff()
-		) and scroll_window
-	then
-		scroll_input = window_scroll_input
-	else
-		scroll_input = window_scroll_input .. cursor_scroll_input
-	end
-	return [[exec "normal! ]] .. scroll_input .. [["]]
-end
 
 ---Window rules for when to stop scrolling
 ---@param data Data
@@ -118,62 +64,75 @@ local function cursor_reached_limit(data, direction)
 	end
 end
 
+---Checks if the cursor would be forced to move due to it being within scrolloff
+---@param data Data
+---@param direction any
+---@return boolean cursor_in_scrolloff
+local function cursor_in_scrolloff(data, direction)
+  local scrolloff = utils.get_scrolloff()
+  if direction < 0 then
+    if data.last_line_visible then
+      return data.win_bottom_line_eof and data.win_lines_below_cursor <= scrolloff
+    else
+      return data.win_lines_below_cursor <= scrolloff
+    end
+  else
+    return data.win_lines_above_cursor <= scrolloff
+  end
+end
+
 ---Check if the window and the cursor can be scrolled further
 ---@param data Data
 ---@param move_cursor boolean
 ---@param direction integer
----@return boolean
----@return boolean
+---@return boolean window_scrolls Window is allowed to scroll
+---@return boolean cursor_scrolls Cursor is allowed to scroll
 local function who_scrolls(data, move_cursor, direction)
-	local scroll_window, scroll_cursor
-	local half_window = math.floor(data.window_height / 2)
-	scroll_window = not window_reached_limit(data, move_cursor, direction)
+  if direction == 0 then
+    error("Direction cannot be zero")
+  end
+	local window_scrolls
+	window_scrolls = not window_reached_limit(data, move_cursor, direction)
 	if not move_cursor then
-		scroll_cursor = false
-	elseif scroll_window then
-		if utils.get_scrolloff() < half_window then
-			scroll_cursor = true
-		else
-			scroll_cursor = false
-		end
+    return window_scrolls, false
+	elseif window_scrolls then
+    return true, not cursor_in_scrolloff(data, direction)
 	elseif opts.cursor_scrolls_alone then
-		scroll_cursor = not cursor_reached_limit(data, direction)
+		return false, not cursor_reached_limit(data, direction)
 	else
-		scroll_cursor = false
+		return false, false
 	end
-	return scroll_window, scroll_cursor
 end
 
 ---Scroll one line in the given direction
 ---@param lines_to_scroll integer
 ---@param scroll_window boolean
 ---@param scroll_cursor boolean
----@param data Data
 ---@return boolean
-local function scroll_one_line(lines_to_scroll, scroll_window, scroll_cursor, data)
+local function scroll_one_line(lines_to_scroll, scroll_window, scroll_cursor)
 	local winline_before = vim.fn.winline()
 	local initial_cursor_line = vim.api.nvim_win_get_cursor(0)[1]
-	local scroll
-	local scrolled_lines
-	if lines_to_scroll > 0 then
-		scrolled_lines = 1
-		scroll = scroll_down
-	else
-		scrolled_lines = -1
-		scroll = scroll_up
-	end
-	local scroll_command = scroll(data, scroll_window, scroll_cursor, 1)
-	local sucess, _ = pcall(vim.cmd, scroll_command)  ---@diagnostic disable-line
+  local cursor_scroll_cmd = lines_to_scroll > 0 and "gj" or "gk"
+  local cursor_scroll_args = scroll_cursor and cursor_scroll_cmd or ""
+  local window_scroll_cmd = lines_to_scroll > 0 and ctrl_e or ctrl_y
+  local window_scroll_args = scroll_window and window_scroll_cmd or ""
+  local args = window_scroll_args .. cursor_scroll_args
+	local sucess, _ = pcall(vim.cmd.normal, {bang = true, args = {args}})  ---@diagnostic disable-line
 	if not sucess then
 		return false
 	end
+  local scrolled_lines = lines_to_scroll > 0 and 1 or -1
 	-- Correct for wrapped lines
 	local lines_behind = vim.fn.winline() - cursor_win_line
 	if lines_to_scroll > 0 then
 		lines_behind = -lines_behind
 	end
 	if scroll_cursor and scroll_window and lines_behind > 0 then
-		vim.cmd(scroll(data, false, scroll_cursor, lines_behind))
+    local cursor_args = string.rep(cursor_scroll_cmd, lines_behind)
+    local sucess, _ = pcall(vim.cmd.normal, {bang = true, args = {cursor_args}})  ---@diagnostic disable-line
+    if not sucess then
+      return false
+    end
 	end
   -- If initial_cursor_line didn't change, we can use it to get scrolled_lines
   -- This is more accurate when some lines are wrapped
@@ -324,9 +283,9 @@ function neoscroll.scroll(lines, move_cursor, time, easing_name, info)
 	else
 		cursor_win_line = data.cursor_win_line
 	end
-	local scroll_window, scroll_cursor = who_scrolls(data, move_cursor, lines)
+	local window_scrolls, cursor_scrolls = who_scrolls(data, move_cursor, lines)
 	-- If neither the window nor the cursor are allowed to scroll finish early
-	if not scroll_window and not scroll_cursor then
+	if not window_scrolls and not cursor_scrolls then
 		return
 	end
 	-- Preparation before scrolling starts
@@ -336,7 +295,7 @@ function neoscroll.scroll(lines, move_cursor, time, easing_name, info)
   local ef = config.easing_functions[ef_name]
 
 	local lines_to_scroll = math.abs(relative_line - target_line)
-	local success = scroll_one_line(lines, scroll_window, scroll_cursor, data)
+	local success = scroll_one_line(lines, window_scrolls, cursor_scrolls)
 	if lines_to_scroll == 1 or not success then
 		stop_scrolling(move_cursor, info)
 	end
@@ -349,8 +308,8 @@ function neoscroll.scroll(lines, move_cursor, time, easing_name, info)
 	local function scroll_callback()
 		lines_to_scroll = target_line - relative_line
 		data = utils.get_data()
-		scroll_window, scroll_cursor = who_scrolls(data, move_cursor, lines_to_scroll)
-		if not scroll_window and not scroll_cursor then
+		window_scrolls, cursor_scrolls = who_scrolls(data, move_cursor, lines_to_scroll)
+		if not window_scrolls and not cursor_scrolls then
 			stop_scrolling(move_cursor, info)
 			return
 		end
@@ -365,7 +324,7 @@ function neoscroll.scroll(lines, move_cursor, time, easing_name, info)
 			stop_scrolling(move_cursor, info)
 			return
 		end
-		success = scroll_one_line(lines_to_scroll, scroll_window, scroll_cursor, data)
+		success = scroll_one_line(lines_to_scroll, window_scrolls, cursor_scrolls, data)
 		if math.abs(lines_to_scroll) == 1 or not success then
 			stop_scrolling(move_cursor, info)
 			return
