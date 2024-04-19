@@ -145,7 +145,7 @@ local function scroll_one_line(lines_to_scroll, scroll_window, scroll_cursor)
   local new_lines_to_scroll = target_line - new_relative_line
   local target_overshot = lines_to_scroll * new_lines_to_scroll < 0
   if target_overshot then
-    lines_to_scroll = 1
+    relative_line = target_line
   else
     relative_line = relative_line + scrolled_lines
   end
@@ -270,7 +270,9 @@ function neoscroll.scroll(lines, move_cursor, time, easing_name, info)
 
     return
   end
-  -- Check if the window and the cursor are allowed to scroll in that direction
+  -- cursor_win_line is used in scroll_one_line() to check that the cursor remains
+  -- in the same window line and we correct for it on the fly if required
+  -- This is only relevant when both window_scrolls and cursor_scrolls are true
   local data = utils.get_data()
   local half_window = math.floor(data.window_height / 2)
   if utils.get_scrolloff() >= half_window then
@@ -282,6 +284,7 @@ function neoscroll.scroll(lines, move_cursor, time, easing_name, info)
   else
     cursor_win_line = data.cursor_win_line
   end
+  -- Check if the window and the cursor are allowed to scroll in that direction
   local window_scrolls, cursor_scrolls = who_scrolls(data, move_cursor, lines)
   -- If neither the window nor the cursor are allowed to scroll finish early
   if not window_scrolls and not cursor_scrolls then
@@ -390,7 +393,6 @@ function neoscroll.G(half_screen_time, easing_name, info)
   local lines = utils.get_lines_below(vim.fn.line("w$"))
   local window_height = vim.fn.winheight(0)
   local cursor_win_line = vim.fn.winline()
-  local win_lines_below_cursor = window_height - cursor_win_line
   local corrected_time =
     math.floor(half_screen_time * (math.abs(lines) / (window_height / 2)) + 0.5)
   info.G = true
