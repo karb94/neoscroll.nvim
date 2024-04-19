@@ -2,14 +2,17 @@ local config = require("neoscroll.config")
 local utils = require("neoscroll.utils")
 local opts
 
-local scroll_timer = vim.loop.new_timer()
-local target_line = 0
-local relative_line = 0
-local cursor_win_line
-local scrolling = false
-local continuous_scroll = false
 local ctrl_y = vim.api.nvim_replace_termcodes("<C-y>", false, false, true)
 local ctrl_e = vim.api.nvim_replace_termcodes("<C-e>", false, false, true)
+local active_scroll = {
+  winid = 0,
+  target_line = 0,
+  relative_line = 0,
+  initial_cursor_win_line = nil,
+  scrolling = false,
+  continuous_scroll = false,
+  scroll_timer = vim.loop.new_timer()
+}
 
 -- Highlight group to hide the cursor
 local hl_callback = function()
@@ -122,7 +125,7 @@ local function scroll_one_line(lines_to_scroll, scroll_window, scroll_cursor)
   end
   local scrolled_lines = lines_to_scroll > 0 and 1 or -1
   -- Correct for wrapped lines
-  local lines_behind = vim.fn.winline() - cursor_win_line
+  local lines_behind = vim.fn.winline() - active_scroll.initial_cursor_win_line
   if lines_to_scroll > 0 then
     lines_behind = -lines_behind
   end
@@ -141,13 +144,13 @@ local function scroll_one_line(lines_to_scroll, scroll_window, scroll_cursor)
   -- If we have past our target line (e.g. when forced by  wrapped lines) set lines_to_scroll
   -- to 1 to trigger stop_scrolling(). Otherwise it will start scrolling backwards and
   -- potentially run into an infinite loop
-  local new_relative_line = relative_line + scrolled_lines
-  local new_lines_to_scroll = target_line - new_relative_line
+  local new_relative_line = active_scroll.relative_line + scrolled_lines
+  local new_lines_to_scroll = active_scroll.target_line - new_relative_line
   local target_overshot = lines_to_scroll * new_lines_to_scroll < 0
   if target_overshot then
-    relative_line = target_line
+    active_scroll.relative_line = active_scroll.target_line
   else
-    relative_line = relative_line + scrolled_lines
+    active_scroll.relative_line = active_scroll.relative_line + scrolled_lines
   end
   return true
 end
@@ -161,7 +164,7 @@ local function before_scrolling(lines, move_cursor, info)
     opts.pre_hook(info)
   end
   -- Start scrolling
-  scrolling = true
+  active_scroll.scrolling = true
   -- Hide cursor line
   if opts.hide_cursor and move_cursor then
     utils.hide_cursor()
@@ -175,7 +178,7 @@ local function before_scrolling(lines, move_cursor, info)
     vim.bo.syntax = "OFF"
   end
   -- Assign number of lines to scroll
-  target_line = lines
+  active_scroll.target_line = lines
 end
 
 ---Scrolling destructor
@@ -197,11 +200,11 @@ local function stop_scrolling(move_cursor, info)
     opts.post_hook(info)
   end
 
-  relative_line = 0
-  target_line = 0
-  scroll_timer:stop()
-  scrolling = false
-  continuous_scroll = false
+  active_scroll.relative_line = 0
+  active_scroll.target_line = 0
+  active_scroll.scroll_timer:stop()
+  active_scroll.scrolling = false
+  active_scroll.continuous_scroll = false
 end
 
 ---Compute current time step of animation
@@ -253,19 +256,19 @@ function neoscroll.scroll(lines, move_cursor, time, easing_name, info)
   -- If still scrolling just modify the amount of lines to scroll
   -- If the scroll is in the opposite direction and
   -- lines_to_scroll is longer than lines stop smoothly
-  if scrolling then
-    local lines_to_scroll = relative_line - target_line
+  if active_scroll.scrolling  then
+    local lines_to_scroll = active_scroll.relative_line - active_scroll.target_line
     local opposite_direction = lines_to_scroll * lines > 0
     local long_scroll = math.abs(lines_to_scroll) - math.abs(lines) > 0
     if opposite_direction and long_scroll then
-      target_line = relative_line - lines
-    elseif continuous_scroll then
-      target_line = relative_line + 2 * lines
+      active_scroll.target_line = active_scroll.relative_line - lines
+    elseif active_scroll.continuous_scroll then
+      active_scroll.target_line = active_scroll.relative_line + 2 * lines
     elseif math.abs(lines_to_scroll) > math.abs(5 * lines) then
-      continuous_scroll = true
-      relative_line = target_line - 2 * lines
+      active_scroll.continuous_scroll = true
+      active_scroll.relative_line = active_scroll.target_line - 2 * lines
     else
-      target_line = target_line + lines
+      active_scroll.target_line = active_scroll.target_line + lines
     end
 
     return
@@ -276,13 +279,13 @@ function neoscroll.scroll(lines, move_cursor, time, easing_name, info)
   local data = utils.get_data()
   local half_window = math.floor(data.window_height / 2)
   if utils.get_scrolloff() >= half_window then
-    cursor_win_line = half_window
+    active_scroll.initial_cursor_win_line = half_window
   elseif data.win_lines_above_cursor <= utils.get_scrolloff() then
-    cursor_win_line = utils.get_scrolloff() + 1
+    active_scroll.initial_cursor_win_line = utils.get_scrolloff() + 1
   elseif data.win_lines_below_cursor <= utils.get_scrolloff() then
-    cursor_win_line = data.window_height - utils.get_scrolloff()
+    active_scroll.initial_cursor_win_line = data.window_height - utils.get_scrolloff()
   else
-    cursor_win_line = data.cursor_win_line
+    active_scroll.initial_cursor_win_line = data.cursor_win_line
   end
   -- Check if the window and the cursor are allowed to scroll in that direction
   local window_scrolls, cursor_scrolls = who_scrolls(data, move_cursor, lines)
@@ -296,7 +299,7 @@ function neoscroll.scroll(lines, move_cursor, time, easing_name, info)
   local ef_name = easing_name and easing_name or opts.easing_function
   local ef = config.easing_functions[ef_name]
 
-  local lines_to_scroll = math.abs(relative_line - target_line)
+  local lines_to_scroll = math.abs(active_scroll.relative_line - active_scroll.target_line)
   local success = scroll_one_line(lines, window_scrolls, cursor_scrolls)
   if lines_to_scroll == 1 or not success then
     stop_scrolling(move_cursor, info)
@@ -308,7 +311,7 @@ function neoscroll.scroll(lines, move_cursor, time, easing_name, info)
 
   -- Callback function triggered by scroll_timer
   local function scroll_callback()
-    lines_to_scroll = target_line - relative_line
+    lines_to_scroll = active_scroll.target_line - active_scroll.relative_line
     data = utils.get_data()
     window_scrolls, cursor_scrolls = who_scrolls(data, move_cursor, lines_to_scroll)
     if not window_scrolls and not cursor_scrolls then
@@ -320,7 +323,7 @@ function neoscroll.scroll(lines, move_cursor, time, easing_name, info)
       local next_lines_to_scroll = math.abs(lines_to_scroll) - 2
       next_time_step = compute_time_step(next_lines_to_scroll, lines, time, ef)
       -- sets the repeat of the next cycle
-      scroll_timer:set_repeat(next_time_step)
+      active_scroll.scroll_timer:set_repeat(next_time_step)
     end
     if math.abs(lines_to_scroll) == 0 then
       stop_scrolling(move_cursor, info)
@@ -334,8 +337,8 @@ function neoscroll.scroll(lines, move_cursor, time, easing_name, info)
   end
 
   -- Start timer to scroll the rest of the lines
-  scroll_timer:start(time_step, next_time_step, vim.schedule_wrap(scroll_callback))
-  scroll_timer:set_repeat(next_next_time_step)
+  active_scroll.scroll_timer:start(time_step, next_time_step, vim.schedule_wrap(scroll_callback))
+  active_scroll.scroll_timer:set_repeat(next_next_time_step)
 end
 
 ---Wrapper for zt
@@ -407,7 +410,7 @@ function neoscroll.gg(half_screen_time, easing_name, info)
   local lines = utils.get_lines_above(vim.fn.line("w0"))
   local window_height = vim.fn.winheight(0)
   local cursor_win_line = vim.fn.winline()
-  lines = -lines - cursor_win_line
+  lines = -lines - active_scroll.initial_cursor_win_line
   local corrected_time =
     math.floor(half_screen_time * (math.abs(lines) / (window_height / 2)) + 0.5)
   neoscroll.scroll(lines, true, corrected_time, easing_name, info)
