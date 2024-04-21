@@ -136,8 +136,8 @@ local function scroll_one_line(lines_to_scroll, scroll_window, scroll_cursor)
       return false
     end
   end
-  -- If initial_cursor_line didn't change, we can use it to get scrolled_lines
-  -- This is more accurate when some lines are wrapped
+  -- If the cursor is still on the same line we can use the change in window line
+  -- to calculate the lines we have scrolled more accurately (not affected by wrapped lines)
   if initial_cursor_line == vim.api.nvim_win_get_cursor(0)[1] then
     scrolled_lines = winline_before - vim.fn.winline()
   end
