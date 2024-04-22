@@ -1,6 +1,6 @@
 local config = {}
 
-config.options = {
+config.default_options = {
   mappings = { "<C-u>", "<C-d>", "<C-b>", "<C-f>", "<C-y>", "<C-e>", "zt", "zz", "zb" },
   hide_cursor = true,
   stop_eof = true,
@@ -10,7 +10,10 @@ config.options = {
 }
 
 function config.set_options(custom_opts)
-  config.options = vim.tbl_deep_extend("force", config.options, custom_opts or {})
+  local options = vim.tbl_deep_extend("force", config.default_options, custom_opts or {})
+  for key, value in pairs(options) do
+    config[key] = value
+  end
 end
 
 config.easing_functions = {
@@ -50,7 +53,7 @@ local function generate_default_mappings(custom_mappings)
   defaults["gg"] = { "gg", { "100" } }
 
   local t = {}
-  local keys = config.options.mappings
+  local keys = config.mappings
   for i = 1, #keys do
     if defaults[keys[i]] ~= nil then
       t[keys[i]] = defaults[keys[i]]

@@ -2,7 +2,7 @@ local function scroll_win_cursor(scrolloff)
   local neoscroll = require("neoscroll")
   local time = 100
   local lines = 7
-  local time_tol = 5
+  local time_tol = require('tests.time_tol')
   local cursor_start = vim.fn.line(".")
   local window_start = vim.fn.line("w0")
   local cursor_finish, window_finish

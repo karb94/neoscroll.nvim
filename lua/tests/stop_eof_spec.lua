@@ -1,7 +1,7 @@
 describe("When EOF is reached", function()
   local neoscroll, cursor_start, cursor_finish, window_start, window_finish
   local time = 100
-  local time_tol = 5
+  local time_tol = require('tests.time_tol')
   local lines = 7
   neoscroll = require("neoscroll")
   vim.api.nvim_command("help help | only")
