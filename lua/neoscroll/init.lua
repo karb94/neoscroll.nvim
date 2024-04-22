@@ -149,6 +149,7 @@ local function scroll_one_line(lines_to_scroll, scroll_window, scroll_cursor)
   local target_overshot = lines_to_scroll * new_lines_to_scroll < 0
   if target_overshot then
     active_scroll.relative_line = active_scroll.target_line
+    return false
   else
     active_scroll.relative_line = active_scroll.relative_line + scrolled_lines
   end
@@ -303,6 +304,7 @@ function neoscroll.scroll(lines, move_cursor, time, easing_name, info)
   local success = scroll_one_line(lines, window_scrolls, cursor_scrolls)
   if lines_to_scroll == 1 or not success then
     stop_scrolling(move_cursor, info)
+    return
   end
   local time_step = compute_time_step(lines_to_scroll, lines, time, ef)
   local next_time_step = compute_time_step(lines_to_scroll - 1, lines, time, ef)
