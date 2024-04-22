@@ -301,7 +301,8 @@ function neoscroll.scroll(lines, move_cursor, time, easing_name, info)
 
   local lines_to_scroll = math.abs(active_scroll.relative_line - active_scroll.target_line)
   local success = scroll_one_line(lines, window_scrolls, cursor_scrolls)
-  if lines_to_scroll == 1 or not success then
+  local new_lines_to_scroll = active_scroll.target_line - active_scroll.relative_line
+  if new_lines_to_scroll == 0 or not success then
     stop_scrolling(move_cursor, info)
     return
   end
@@ -331,8 +332,8 @@ function neoscroll.scroll(lines, move_cursor, time, easing_name, info)
       return
     end
     success = scroll_one_line(lines_to_scroll, window_scrolls, cursor_scrolls)
-    lines_to_scroll = active_scroll.target_line - active_scroll.relative_line
-    if math.abs(lines_to_scroll) == 0 or not success then
+    new_lines_to_scroll = active_scroll.target_line - active_scroll.relative_line
+    if new_lines_to_scroll == 0 or not success then
       stop_scrolling(move_cursor, info)
       return
     end
