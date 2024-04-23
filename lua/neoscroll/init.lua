@@ -112,6 +112,9 @@ end
 ---@param scroll_cursor boolean
 ---@return boolean
 local function scroll_one_line(lines_to_scroll, scroll_window, scroll_cursor)
+  if lines_to_scroll == 0 then
+    error("lines_to_scroll cannot be zero")
+  end
   local winline_before = vim.fn.winline()
   local initial_cursor_line = vim.api.nvim_win_get_cursor(0)[1]
   local cursor_scroll_cmd = lines_to_scroll > 0 and "gj" or "gk"
@@ -185,6 +188,8 @@ end
 ---@param move_cursor boolean
 ---@param info table
 local function stop_scrolling(move_cursor, info)
+  active_scroll.scroll_timer:stop()
+
   if opts.hide_cursor == true and move_cursor then
     utils.unhide_cursor()
   end
@@ -202,7 +207,6 @@ local function stop_scrolling(move_cursor, info)
 
   active_scroll.relative_line = 0
   active_scroll.target_line = 0
-  active_scroll.scroll_timer:stop()
   active_scroll.scrolling = false
   active_scroll.continuous_scroll = false
 end
@@ -270,7 +274,6 @@ function neoscroll.scroll(lines, move_cursor, time, easing_name, info)
     else
       active_scroll.target_line = active_scroll.target_line + lines
     end
-
     return
   end
   -- cursor_win_line is used in scroll_one_line() to check that the cursor remains
@@ -314,6 +317,10 @@ function neoscroll.scroll(lines, move_cursor, time, easing_name, info)
   -- Callback function triggered by scroll_timer
   local function scroll_callback()
     lines_to_scroll = active_scroll.target_line - active_scroll.relative_line
+    if lines_to_scroll == 0 then
+      stop_scrolling(move_cursor, info)
+      return
+    end
     data = utils.get_data()
     window_scrolls, cursor_scrolls = who_scrolls(data, move_cursor, lines_to_scroll)
     if not window_scrolls and not cursor_scrolls then
