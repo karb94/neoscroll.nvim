@@ -168,6 +168,8 @@ local function before_scrolling(lines, move_cursor, info)
   end
   -- Start scrolling
   active_scroll.scrolling = true
+  -- Set current winid
+  active_scroll.winid = vim.fn.win_getid()
   -- Hide cursor line
   if opts.hide_cursor and move_cursor then
     utils.hide_cursor()
@@ -317,7 +319,7 @@ function neoscroll.scroll(lines, move_cursor, time, easing_name, info)
   -- Callback function triggered by scroll_timer
   local function scroll_callback()
     lines_to_scroll = active_scroll.target_line - active_scroll.relative_line
-    if lines_to_scroll == 0 then
+    if lines_to_scroll == 0 or active_scroll.winid ~= vim.fn.win_getid() then
       stop_scrolling(move_cursor, info)
       return
     end
