@@ -95,7 +95,9 @@ function neoscroll.scroll(lines, move_cursor, time, easing_name, info, winid)
   if is_float(lines) then
     lines = get_lines_from_win_fraction(lines, scroll_opts.winid)
   end
-  if lines == 0 then return end
+  if lines == 0 then
+    return
+  end
   if scrolls[winid] == nil then
     scrolls[winid] = Scroll:new(scroll_opts)
   end
@@ -171,7 +173,7 @@ function neoscroll.zt(half_screen_time, easing_name, info, winid)
   local window_height = vim.fn.winheight(0)
   local win_lines_above_cursor = vim.fn.winline() - 1
   -- Temporary fix for garbage values in local scrolloff when not set
-  local lines = win_lines_above_cursor - window.get_scrolloff()
+  local lines = win_lines_above_cursor - window.scrolloff()
   if lines == 0 then
     return
   end
@@ -201,7 +203,7 @@ function neoscroll.zb(half_screen_time, easing_name, info, winid)
   local window_height = vim.fn.winheight(0)
   local lines_below_cursor = window_height - vim.fn.winline()
   -- Temporary fix for garbage values in local scrolloff when not set
-  local lines = -lines_below_cursor + window.get_scrolloff()
+  local lines = -lines_below_cursor + window.scrolloff()
   if lines == 0 then
     return
   end
