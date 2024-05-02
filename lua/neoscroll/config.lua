@@ -7,59 +7,16 @@ config.default_options = {
   respect_scrolloff = false,
   cursor_scrolls_alone = true,
   performance_mode = false,
+  easing = "linear",
 }
+
+config.opts = vim.deepcopy(config.default_options)
 
 function config.set_options(custom_opts)
-  local options = vim.tbl_deep_extend("force", config.default_options, custom_opts or {})
-  for key, value in pairs(options) do
-    config[key] = value
+  -- local options = vim.tbl_deep_extend("force", config.default_options, custom_opts or {})
+  for key, value in pairs(custom_opts) do
+    config.opts[key] = value
   end
-end
-
-config.easing_functions = {
-  quadratic = function(x)
-    return 1 - math.pow(1 - x, 1 / 2)
-  end,
-  cubic = function(x)
-    return 1 - math.pow(1 - x, 1 / 3)
-  end,
-  quartic = function(x)
-    return 1 - math.pow(1 - x, 1 / 4)
-  end,
-  quintic = function(x)
-    return 1 - math.pow(1 - x, 1 / 5)
-  end,
-  circular = function(x)
-    return 1 - math.pow(1 - x * x, 1 / 2)
-  end,
-  sine = function(x)
-    return 2 * math.asin(x) / math.pi
-  end,
-}
-
-local function generate_default_mappings(custom_mappings)
-  custom_mappings = custom_mappings and custom_mappings or {}
-  local defaults = {}
-  defaults["<C-u>"] = { "scroll", { "-vim.wo.scroll", "true", "250" } }
-  defaults["<C-d>"] = { "scroll", { "vim.wo.scroll", "true", "250" } }
-  defaults["<C-b>"] = { "scroll", { "-vim.fn.winheight(0)", "true", "450" } }
-  defaults["<C-f>"] = { "scroll", { "vim.fn.winheight(0)", "true", "450" } }
-  defaults["<C-y>"] = { "scroll", { "-0.10", "false", "100" } }
-  defaults["<C-e>"] = { "scroll", { "0.10", "false", "100" } }
-  defaults["zt"] = { "zt", { "250" } }
-  defaults["zz"] = { "zz", { "250" } }
-  defaults["zb"] = { "zb", { "250" } }
-  defaults["G"] = { "G", { "100" } }
-  defaults["gg"] = { "gg", { "100" } }
-
-  local t = {}
-  local keys = config.mappings
-  for i = 1, #keys do
-    if defaults[keys[i]] ~= nil then
-      t[keys[i]] = defaults[keys[i]]
-    end
-  end
-  return t
 end
 
 -- Helper function for mapping keys
@@ -75,15 +32,8 @@ end
 
 -- Set mappings
 function config.set_mappings(custom_mappings)
-  if custom_mappings ~= nil then
-    for key, val in pairs(custom_mappings) do
-      map_key(key, val[1], val[2])
-    end
-  else
-    local default_mappings = generate_default_mappings()
-    for key, val in pairs(default_mappings) do
-      map_key(key, val[1], val[2])
-    end
+  for key, val in pairs(custom_mappings) do
+    map_key(key, val[1], val[2])
   end
 end
 

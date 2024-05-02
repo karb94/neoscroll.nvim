@@ -1,16 +1,27 @@
-local config = require("neoscroll.config")
+local config = require("neoscroll.config").opts
 local window = require("neoscroll.window")
 local logic = require("neoscroll.logic")
-local Scroll = require("neoscroll.scroll")
-
-local scrolls = {}
+local scroll = require("neoscroll.scroll")
 
 -- Highlight group to hide the cursor
 local hl_callback = function()
   vim.api.nvim_set_hl(0, "NeoscrollHiddenCursor", { reverse = true, blend = 100 })
 end
 hl_callback()
-vim.api.nvim_create_autocmd({ "ColorScheme" }, { pattern = { "*" }, callback = hl_callback })
+local cursor_group = vim.api.nvim_create_augroup("NeoscrollHiddenCursor", {})
+vim.api.nvim_create_autocmd({ "ColorScheme" }, { group = cursor_group, callback = hl_callback })
+
+-- Stop scrolling when changing window focus
+local teardown_group = vim.api.nvim_create_augroup("NeoscrollTearDown", {})
+local teardown_callback = function()
+  if scroll.scrolling then
+    scroll:tear_down()
+  end
+end
+vim.api.nvim_create_autocmd(
+  { "WinLeave" },
+  { group = teardown_group, callback = teardown_callback }
+)
 
 -- Helper function to check if a number is a float
 local function is_float(n)
@@ -32,43 +43,35 @@ local function get_lines_from_win_fraction(fraction, winid)
   return lines
 end
 
-local function stop_scrolling(scroll)
-  scroll:tear_down()
-  scrolls[scroll.opts.winid] = nil
-end
-
-local function make_scroll_callback(lines, time, scroll)
-  local winid = scroll.opts.winid
-  local move_cursor = scroll.opts.move_cursor
-  local ef_name = scroll.opts.easing_name and scroll.opts.easing_name or config.easing_function
-  local ef = config.easing_functions[ef_name]
+local function make_scroll_callback()
   return function()
     local lines_to_scroll = scroll:lines_to_scroll()
     if lines_to_scroll == 0 then
-      stop_scrolling(scroll)
+      scroll:tear_down()
       return
     end
-    local data = winid == 0 and window.get_data() or vim.api.nvim_win_call(winid, window.get_data)
-    local window_scrolls, cursor_scrolls = logic.who_scrolls(data, move_cursor, lines_to_scroll)
+    local data = window.get_data(scroll.opts.winid)
+    local window_scrolls, cursor_scrolls =
+      logic.who_scrolls(data, scroll.opts.move_cursor, lines_to_scroll)
     if not window_scrolls and not cursor_scrolls then
-      stop_scrolling(scroll)
+      scroll:tear_down()
       return
     end
 
-    if math.abs(lines_to_scroll) > 2 and ef then
+    if math.abs(lines_to_scroll) > 2 then
       local next_lines_to_scroll = math.abs(lines_to_scroll) - 2
-      local next_time_step = logic.compute_time_step(next_lines_to_scroll, lines, time, ef)
+      local next_time_step = scroll:compute_time_step(next_lines_to_scroll)
       -- sets the repeat of the next cycle
-      scroll.scroll_timer:set_repeat(next_time_step)
+      scroll.timer:set_repeat(next_time_step)
     end
     if math.abs(lines_to_scroll) == 0 then
-      stop_scrolling(scroll)
+      scroll:tear_down()
       return
     end
     local success = scroll:scroll_one_line(lines_to_scroll, window_scrolls, cursor_scrolls)
     local new_lines_to_scroll = scroll:lines_to_scroll()
     if new_lines_to_scroll == 0 or not success then
-      stop_scrolling(scroll)
+      scroll:tear_down()
       return
     end
   end
@@ -76,32 +79,54 @@ end
 
 local neoscroll = {}
 
+---@param lines number
+---@param move_cursor boolean | nil | table Scroll the window and the cursor simultaneously
+---@param duration number | nil Duration of the animation in miliseconds
+---@param easing string | nil Easing function to smooth the animation
+---@param info table | nil
+---@param winid integer | nil ID of the window to scroll
+function neoscroll.scroll(lines, move_cursor, duration, easing, info, winid)
+  local opts
+  if type(move_cursor) == "table" then
+    opts = move_cursor
+  else
+    -- vim.notify("Neoscroll: deprecation warning", vim.log.levels.WARN, {title = 'Neoscroll'})
+    opts = {
+      move_cursor = move_cursor,
+      duration = duration,
+      easing = easing,
+      info = info,
+      winid = winid,
+    }
+  end
+  neoscroll.new_scroll(lines, opts)
+end
+
+---@class ScrollOpts
+---@field move_cursor boolean | nil Scroll the window and the cursor simultaneously
+---@field duration number | nil Duration of the animation in miliseconds
+---@field easing string | nil Easing function to smooth the animation
+---@field info table | nil
+---@field winid integer | nil ID of the window to scroll
+default_scroll_opts = {
+  move_cursor = true,
+  time = nil,
+  winid = 0,
+}
+
 ---Scrolling function
 ---@param lines number Number of lines to scroll or fraction of window to scroll
----@param move_cursor boolean Scroll the window and the cursor simultaneously
----@param time number Duration of the animation in miliseconds
----@param easing_name string Easing function to smooth the animation
----@param info table
----@param winid integer ID of the window to scroll
-function neoscroll.scroll(lines, move_cursor, time, easing_name, info, winid)
-  winid = winid or 0
-  local scroll_opts = {
-    move_cursor = move_cursor,
-    easing_name = easing_name,
-    info = info,
-    winid = winid,
-  }
+---@param opts ScrollOpts Scroll options
+function neoscroll.new_scroll(lines, opts)
+  scroll.opts = vim.tbl_deep_extend("force", default_scroll_opts, opts or {})
   -- If lines is a fraction of the window transform it to lines
   if is_float(lines) then
-    lines = get_lines_from_win_fraction(lines, scroll_opts.winid)
+    lines = get_lines_from_win_fraction(lines, scroll.opts.winid)
   end
+  scroll.lines = lines
   if lines == 0 then
     return
   end
-  if scrolls[winid] == nil then
-    scrolls[winid] = Scroll:new(scroll_opts)
-  end
-  local scroll = scrolls[winid]
   -- If still scrolling just modify the amount of lines to scroll
   -- If the scroll is in the opposite direction and
   -- lines_to_scroll is longer than lines stop smoothly
@@ -124,7 +149,7 @@ function neoscroll.scroll(lines, move_cursor, time, easing_name, info, winid)
   -- cursor_win_line is used in scroll:scroll_one_line() to check that the cursor remains
   -- in the same window line and we correct for it on the fly if required
   -- This is only relevant when both window_scrolls and cursor_scrolls are true
-  local data = winid == 0 and window.get_data() or vim.api.nvim_win_call(winid, window.get_data)
+  local data = window.get_data(scroll.opts.winid)
   local half_window = math.floor(data.window_height / 2)
   if data.scrolloff >= half_window then
     scroll.initial_cursor_win_line = half_window
@@ -136,40 +161,77 @@ function neoscroll.scroll(lines, move_cursor, time, easing_name, info, winid)
     scroll.initial_cursor_win_line = data.cursor_win_line
   end
   -- Check if the window and the cursor are allowed to scroll in that direction
-  local window_scrolls, cursor_scrolls = logic.who_scrolls(data, move_cursor, lines)
+  local window_scrolls, cursor_scrolls = logic.who_scrolls(data, scroll.opts.move_cursor, lines)
   -- If neither the window nor the cursor are allowed to scroll finish early
   if not window_scrolls and not cursor_scrolls then
     return
   end
   -- Preparation before scrolling starts
-  scroll:set_up(lines, move_cursor, info, winid)
-  -- If easing function is not specified default to easing_function
-  local ef_name = easing_name and easing_name or config.easing_function
-  local ef = config.easing_functions[ef_name]
+  scroll:set_up()
 
   local lines_to_scroll_abs = math.abs(scroll:lines_to_scroll())
   local success = scroll:scroll_one_line(lines, window_scrolls, cursor_scrolls)
   local new_lines_to_scroll = scroll.target_line - scroll.relative_line
   if new_lines_to_scroll == 0 or not success then
-    stop_scrolling(scroll)
+    scroll:tear_down()
     return
   end
-  local time_step = logic.compute_time_step(lines_to_scroll_abs, lines, time, ef)
-  local next_time_step = logic.compute_time_step(lines_to_scroll_abs - 1, lines, time, ef)
-  local next_next_time_step = logic.compute_time_step(lines_to_scroll_abs - 2, lines, time, ef)
+  local time_step = scroll:compute_time_step(lines_to_scroll_abs)
+  local next_time_step = scroll:compute_time_step(lines_to_scroll_abs - 1)
+  local next_next_time_step = scroll:compute_time_step(lines_to_scroll_abs - 2)
 
-  -- Callback function triggered by scroll_timer
-  local scroll_callback = make_scroll_callback(lines, time, scroll)
+  -- Callback function triggered by timer
+  local scroll_callback = make_scroll_callback()
   -- Start timer to scroll the rest of the lines
-  scroll.scroll_timer:start(time_step, next_time_step, vim.schedule_wrap(scroll_callback))
-  scroll.scroll_timer:set_repeat(next_next_time_step)
+  scroll.timer:start(time_step, next_time_step, vim.schedule_wrap(scroll_callback))
+  scroll.timer:set_repeat(next_next_time_step)
 end
 
----Wrapper for zt
----@param half_screen_time number Duration of the animation for a scroll of half a window
----@param easing_name string Easing function to smooth the animation
----@param info table
-function neoscroll.zt(half_screen_time, easing_name, info, winid)
+---ctrl-u emulation
+---@param opts ScrollOpts
+function neoscroll.ctrl_u(opts)
+  opts = vim.tbl_deep_extend("force", opts, { move_cursor = true })
+  require("neoscroll").scroll(-vim.wo.scroll, opts)
+end
+
+---ctrl-d emulation
+---@param opts ScrollOpts
+function neoscroll.ctrl_d(opts)
+  opts = vim.tbl_deep_extend("force", opts, { move_cursor = true })
+  require("neoscroll").scroll(vim.wo.scroll, opts)
+end
+
+---ctrl-b emulation
+---@param opts ScrollOpts
+function neoscroll.ctrl_b(opts)
+  opts = vim.tbl_deep_extend("force", opts, { move_cursor = true })
+  require("neoscroll").scroll(-vim.fn.winheight(0), opts)
+end
+
+---ctrl-f emulation
+---@param opts ScrollOpts
+function neoscroll.ctrl_f(opts)
+  opts = vim.tbl_deep_extend("force", opts, { move_cursor = true })
+  require("neoscroll").scroll(vim.fn.winheight(0), opts)
+end
+
+---@class Zopts
+---@field half_win_duration number Duration of the animation in miliseconds
+---@field easing string | nil Easing function to smooth the animation
+---@field info table | nil
+---@field winid integer | nil ID of the window to scroll
+
+---zt emulation
+---@param half_win_duration number | Zopts Duration of the animation for a scroll of half a window
+---@param easing string | nil Easing function to smooth the animation
+---@param info table | nil
+function neoscroll.zt(half_win_duration, easing, info, winid)
+  if type(half_win_duration) == "table" then
+    local zopts = half_win_duration
+    easing = zopts.easing
+    winid = zopts.winid
+    info = zopts.info
+  end
   local window_height = vim.fn.winheight(0)
   local win_lines_above_cursor = vim.fn.winline() - 1
   -- Temporary fix for garbage values in local scrolloff when not set
@@ -177,29 +239,55 @@ function neoscroll.zt(half_screen_time, easing_name, info, winid)
   if lines == 0 then
     return
   end
-  local corrected_time =
-    math.floor(half_screen_time * (math.abs(lines) / (window_height / 2)) + 0.5)
-  neoscroll.scroll(lines, false, corrected_time, easing_name, info, winid)
+  local duration = math.floor(half_win_duration * (math.abs(lines) / (window_height / 2)) + 0.5)
+  local opts = {
+    move_cursor = false,
+    duration = duration,
+    easing_name = easing,
+    winid = winid,
+    info = info,
+  }
+  neoscroll.scroll(lines, opts)
 end
--- Wrapper for zz
----@param half_screen_time number Duration of the animation for a scroll of half a window
----@param easing_name string Easing function to smooth the animation
----@param info table
-function neoscroll.zz(half_screen_time, easing_name, info, winid)
+
+---zz emulation
+---@param half_win_duration number | Zopts Duration of the animation for a scroll of half a window
+---@param easing string | nil Easing function to smooth the animation
+---@param info table | nil
+function neoscroll.zz(half_win_duration, easing, info, winid)
+  if type(half_win_duration) == "table" then
+    local zopts = half_win_duration
+    easing = zopts.easing
+    winid = zopts.winid
+    info = zopts.info
+  end
   local window_height = vim.fn.winheight(0)
   local lines = vim.fn.winline() - math.ceil(window_height / 2)
   if lines == 0 then
     return
   end
-  local corrected_time =
-    math.floor(half_screen_time * (math.abs(lines) / (window_height / 2)) + 0.5)
-  neoscroll.scroll(lines, false, corrected_time, easing_name, info, winid)
+  local duration = math.floor(half_win_duration * (math.abs(lines) / (window_height / 2)) + 0.5)
+  local opts = {
+    move_cursor = false,
+    duration = duration,
+    easing_name = easing,
+    winid = winid,
+    info = info,
+  }
+  neoscroll.scroll(lines, opts)
 end
--- Wrapper for zb
----@param half_screen_time number Duration of the animation for a scroll of half a window
----@param easing_name string Easing function to smooth the animation
----@param info table
-function neoscroll.zb(half_screen_time, easing_name, info, winid)
+
+---zb emulation
+---@param half_win_duration number | Zopts Duration of the animation for a scroll of half a window
+---@param easing string | nil Easing function to smooth the animation
+---@param info table | nil
+function neoscroll.zb(half_win_duration, easing, info, winid)
+  if type(half_win_duration) == "table" then
+    local zopts = half_win_duration
+    easing = zopts.easing
+    winid = zopts.winid
+    info = zopts.info
+  end
   local window_height = vim.fn.winheight(0)
   local lines_below_cursor = window_height - vim.fn.winline()
   -- Temporary fix for garbage values in local scrolloff when not set
@@ -207,41 +295,78 @@ function neoscroll.zb(half_screen_time, easing_name, info, winid)
   if lines == 0 then
     return
   end
-  local corrected_time =
-    math.floor(half_screen_time * (math.abs(lines) / (window_height / 2)) + 0.5)
-  neoscroll.scroll(lines, false, corrected_time, easing_name, info, winid)
+  local duration = math.floor(half_win_duration * (math.abs(lines) / (window_height / 2)) + 0.5)
+  local opts = {
+    move_cursor = false,
+    duration = duration,
+    easing_name = easing,
+    winid = winid,
+    info = info,
+  }
+  neoscroll.scroll(lines, opts)
 end
 
----Emulates `G` motion
----@param half_screen_time number Duration of the animation for a scroll of half a window
----@param easing_name string Easing function to smooth the animation
----@param info table
-function neoscroll.G(half_screen_time, easing_name, info, winid)
+---G emulation
+---@param half_win_duration number | Zopts Duration of the animation for a scroll of half a window
+---@param easing string | nil Easing function to smooth the animation
+---@param info table | nil
+function neoscroll.G(half_win_duration, easing, info, winid)
   local lines = window.get_lines_below(vim.fn.line("w$"))
   local window_height = vim.fn.winheight(0)
-  local corrected_time =
-    math.floor(half_screen_time * (math.abs(lines) / (window_height / 2)) + 0.5)
+  local duration = math.floor(half_win_duration * (math.abs(lines) / (window_height / 2)) + 0.5)
   info.G = true
-  neoscroll.scroll(lines, true, corrected_time, easing_name, info, winid)
+  local opts = {
+    move_cursor = true,
+    duration = duration,
+    easing_name = easing,
+    winid = winid,
+    info = info,
+  }
+  neoscroll.scroll(lines, opts)
 end
 
--- ---Emulates `gg` motion
--- ---@param half_screen_time number Duration of the animation for a scroll of half a window
--- ---@param easing_name string Easing function to smooth the animation
--- ---@param info table
-function neoscroll.gg(half_screen_time, easing_name, info, winid)
+---gg emulation
+---@param half_win_duration number | Zopts Duration of the animation for a scroll of half a window
+---@param easing_name string | nil Easing function to smooth the animation
+---@param info table | nil
+function neoscroll.gg(half_win_duration, easing_name, info, winid)
   local lines = window.get_lines_above(vim.fn.line("w0"))
   local window_height = vim.fn.winheight(winid)
   local cursor_win_line = vim.fn.winline()
   lines = -lines - cursor_win_line
-  local corrected_time =
-    math.floor(half_screen_time * (math.abs(lines) / (window_height / 2)) + 0.5)
-  neoscroll.scroll(lines, true, corrected_time, easing_name, info, winid)
+  local duration = math.floor(half_win_duration * (math.abs(lines) / (window_height / 2)) + 0.5)
+  local opts = {
+    move_cursor = true,
+    duration = duration,
+    easing_name = easing_name,
+    winid = winid,
+    info = info,
+  }
+  neoscroll.scroll(lines, opts)
 end
 
+-- stylua: ignore start
+local function_mappings = {
+  ["<C-u>"] = function() neoscroll.ctrl_u({duration = 250}) end;
+  ["<C-d>"] = function() neoscroll.ctrl_d({duration = 250}) end;
+  ["<C-b>"] = function() neoscroll.ctrl_b({duration = 450}) end;
+  ["<C-f>"] = function() neoscroll.ctrl_f({duration = 450}) end;
+  ["<C-y>"] = function() neoscroll.scroll(-0.1, { move_cursor=false; duration = 100}) end;
+  ["<C-e>"] = function() neoscroll.scroll(0.1, {move_cursor=false; duration = 100}) end;
+  ["zt"]    = function() neoscroll.zt({half_win_duration = 250}) end;
+  ["zz"]    = function() neoscroll.zz({half_win_duration = 250}) end;
+  ["zb"]    = function() neoscroll.zb({half_win_duration = 250}) end;
+  ["G"]     = function() neoscroll.G({half_win_duration = 250}) end;
+  ["gg"]    = function() neoscroll.gg({half_win_duration = 250}) end;
+}
+-- stylua: ignore end
+
 function neoscroll.setup(custom_opts)
-  config.set_options(custom_opts)
-  config.set_mappings()
+  require("neoscroll.config").set_options(custom_opts)
+  local modes = { "n", "v", "x" }
+  for _, key in ipairs(config.mappings) do
+    vim.keymap.set(modes, key, function_mappings[key])
+  end
   vim.cmd("command! NeoscrollEnablePM let b:neoscroll_performance_mode = v:true")
   vim.cmd("command! NeoscrollDisablePM let b:neoscroll_performance_mode = v:false")
   vim.cmd("command! NeoscrollEnableBufferPM let b:neoscroll_performance_mode = v:true")

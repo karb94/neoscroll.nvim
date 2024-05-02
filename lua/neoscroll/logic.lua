@@ -1,4 +1,4 @@
-local config = require('neoscroll.config')
+local config = require("neoscroll.config").opts
 
 local logic = {}
 
@@ -85,36 +85,6 @@ function logic.who_scrolls(data, move_cursor, direction)
   else
     return false, false
   end
-end
-
----Compute current time step of animation
----@param lines_to_scroll integer Number of lines left to scroll
----@param lines integer Initial number of lines to scroll
----@param time number Total time of the animation
----@param easing fun(x: number): number Easing function to smooth the animation
----@return integer
-function logic.compute_time_step(lines_to_scroll, lines, time, easing)
-  -- lines_to_scroll should always be positive
-  -- If there's less than one line to scroll time_step doesn't matter
-  if lines_to_scroll < 1 then
-    return 1000
-  end
-  local lines_range = math.abs(lines)
-  local time_step
-  -- If not yet in range return average time-step
-  if not easing then
-    time_step = math.floor(time / (lines_range - 1) + 0.5)
-  elseif lines_to_scroll >= lines_range then
-    time_step = math.floor(time * easing(1 / lines_range) + 0.5)
-  else
-    local x1 = (lines_range - lines_to_scroll) / lines_range
-    local x2 = (lines_range - lines_to_scroll + 1) / lines_range
-    time_step = math.floor(time * (easing(x2) - easing(x1)) + 0.5)
-  end
-  if time_step == 0 then
-    time_step = 1
-  end
-  return time_step
 end
 
 return logic

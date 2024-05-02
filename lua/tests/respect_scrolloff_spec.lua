@@ -1,7 +1,7 @@
 describe("When BOF is reached", function()
   local neoscroll, cursor_start, cursor_finish, window_start, window_finish
   local time = 100
-  local time_tol = require('tests.time_tol')
+  local time_tol = require("tests.time_tol")
   local opts = { stop_eof = true, cursor_scrolls_alone = true }
   neoscroll = require("neoscroll")
   vim.api.nvim_command("help help | only")

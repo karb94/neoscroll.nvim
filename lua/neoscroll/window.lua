@@ -63,7 +63,7 @@ end
 -- vim.fn.line("w0") -> if there's a fold returns first line of fold
 -- vim.fn.line("w$") -> if there's a fold returns last line of fold
 ---@return Data
-function window.get_data()
+local function get_data()
   local t = {
     win_top_line = vim.fn.line("w0"),
     win_bottom_line = vim.fn.line("w$"),
@@ -84,6 +84,17 @@ function window.get_data()
     t.win_bottom_line_eof = false
   end
   return t
+end
+
+--- _get_data wrapper
+---@param winid integer
+---@return Data
+function window.get_data(winid)
+  if winid == 0 then
+    return get_data()
+  else
+    return vim.api.nvim_win_call(winid, get_data)
+  end
 end
 
 return window
