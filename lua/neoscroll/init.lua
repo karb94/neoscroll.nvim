@@ -228,6 +228,7 @@ end
 function neoscroll.zt(half_win_duration, easing, info, winid)
   if type(half_win_duration) == "table" then
     local zopts = half_win_duration
+    half_win_duration = zopts.half_win_duration
     easing = zopts.easing
     winid = zopts.winid
     info = zopts.info
@@ -257,6 +258,7 @@ end
 function neoscroll.zz(half_win_duration, easing, info, winid)
   if type(half_win_duration) == "table" then
     local zopts = half_win_duration
+    half_win_duration = zopts.half_win_duration
     easing = zopts.easing
     winid = zopts.winid
     info = zopts.info
@@ -284,6 +286,7 @@ end
 function neoscroll.zb(half_win_duration, easing, info, winid)
   if type(half_win_duration) == "table" then
     local zopts = half_win_duration
+    half_win_duration = zopts.half_win_duration
     easing = zopts.easing
     winid = zopts.winid
     info = zopts.info
@@ -362,6 +365,7 @@ local function_mappings = {
 -- stylua: ignore end
 
 function neoscroll.setup(custom_opts)
+  custom_opts = custom_opts or {}
   require("neoscroll.config").set_options(custom_opts)
   local modes = { "n", "v", "x" }
   for _, key in ipairs(config.mappings) do
