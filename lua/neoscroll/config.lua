@@ -13,7 +13,6 @@ config.default_options = {
 config.opts = vim.deepcopy(config.default_options)
 
 function config.set_options(custom_opts)
-  -- local options = vim.tbl_deep_extend("force", config.default_options, custom_opts or {})
   for key, value in pairs(custom_opts) do
     config.opts[key] = value
   end

@@ -364,8 +364,28 @@ local function_mappings = {
 }
 -- stylua: ignore end
 
+---Checks that the mappings supplied exists in function_mappings
+---@param mappings table
+local function validate_mappings(mappings)
+  for _, keymap_key in ipairs(mappings) do
+    if function_mappings[keymap_key] == nil then
+      error(
+        "'" .. keymap_key .. "' " ..
+        "is not part of Neoscroll default mappings.\n" ..
+        "See `:help neoscroll-default-mappings` for a list of available mappings\n" ..
+        "or create your custom mappings using `:help neoscroll-functions` " ..
+        "(see the README for some examples on how to do this)"
+      )
+    end
+  end
+end
+
 function neoscroll.setup(custom_opts)
   custom_opts = custom_opts or {}
+  -- Validate supplied mappings
+  if custom_opts.mappings ~= nil then
+      validate_mappings(custom_opts.mappings)
+  end
   require("neoscroll.config").set_options(custom_opts)
   local modes = { "n", "v", "x" }
   for _, key in ipairs(config.mappings) do

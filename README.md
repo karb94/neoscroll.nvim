@@ -56,29 +56,33 @@ require('neoscroll').setup({
 
 ## Custom mappings
 You can create your own scrolling mappings using the following lua functions:
-* `scroll(lines, move_cursor, time[, easing])`
-* `zt(half_win_time[, easing])`
-* `zz(half_win_time[, easing])`
-* `zb(half_win_time[, easing])`
+* `scroll(lines, opts)`
+* `ctrl_u`
+* `ctrl_d`
+* `ctrl_b`
+* `ctrl_f`
+* `zt(half_win_duration, opts)`
+* `zz(half_win_duration, opts)`
+* `zb(half_win_duration, opts)`
 
-Read the documentation for more details on how to use each function.
+Read `:help neoscroll-functions` for more details.
 
 You can use the following syntactic sugar in your init.lua to define lua
 function mappings in normal, visual and select modes:
 ```lua
 neoscroll = require('neoscroll')
 local keymap = {
-  ["<C-u>"] = function() neoscroll.ctrl_u({ time = 250 }) end;
-  ["<C-d>"] = function() neoscroll.ctrl_d({ time = 250 }) end;
-  ["<C-b>"] = function() neoscroll.ctrl_b({ time = 450 }) end;
-  ["<C-f>"] = function() neoscroll.ctrl_f({ time = 450 }) end;
-  ["<C-y>"] = function() neoscroll.scroll(-0.1, { move_cursor=false; time = 100 }) end;
-  ["<C-e>"] = function() neoscroll.scroll(0.1, { move_cursor=false; time = 100 }) end;
-  ["zt"]    = function() neoscroll.zt({ half_screen_time = 250 }) end;
-  ["zz"]    = function() neoscroll.zz({ half_screen_time = 250 }) end;
-  ["zb"]    = function() neoscroll.zb({ half_screen_time = 250 }) end;
-  ["G"]     = function() neoscroll.G({ half_screen_time = 250 }) end;
-  ["gg"]    = function() neoscroll.gg({ half_screen_time = 250 }) end;
+  ["<C-u>"] = function() neoscroll.ctrl_u({ duration = 250 }) end;
+  ["<C-d>"] = function() neoscroll.ctrl_d({ duration = 250 }) end;
+  ["<C-b>"] = function() neoscroll.ctrl_b({ duration = 450 }) end;
+  ["<C-f>"] = function() neoscroll.ctrl_f({ duration = 450 }) end;
+  ["<C-y>"] = function() neoscroll.scroll(-0.1, { move_cursor=false; duration = 100 }) end;
+  ["<C-e>"] = function() neoscroll.scroll(0.1, { move_cursor=false; duration = 100 }) end;
+  ["zt"]    = function() neoscroll.zt({ half_screen_duration = 250 }) end;
+  ["zz"]    = function() neoscroll.zz({ half_screen_duration = 250 }) end;
+  ["zb"]    = function() neoscroll.zb({ half_screen_duration = 250 }) end;
+  ["G"]     = function() neoscroll.G({ half_screen_duration = 250 }) end;
+  ["gg"]    = function() neoscroll.gg({ half_screen_duration = 250 }) end;
 }
 local modes = { 'n', 'v', 'x' }
 for key, func in pairs(keymap) do
@@ -113,14 +117,14 @@ neoscroll.setup({
 })
 local keymap = {
   -- Use the "sine" easing function
-  ["<C-u>"] = function() neoscroll.ctrl_u({ time = 250; easing = 'sine' }) end;
-  ["<C-d>"] = function() neoscroll.ctrl_d({ time = 250; easing = 'sine' }) end;
+  ["<C-u>"] = function() neoscroll.ctrl_u({ duration = 250; easing = 'sine' }) end;
+  ["<C-d>"] = function() neoscroll.ctrl_d({ duration = 250; easing = 'sine' }) end;
   -- Use the "circular" easing function
-  ["<C-b>"] = function() neoscroll.ctrl_b({ time = 450; easing = 'circular' }) end;
-  ["<C-f>"] = function() neoscroll.ctrl_f({ time = 450; easing = 'circular' }) end;
+  ["<C-b>"] = function() neoscroll.ctrl_b({ duration = 450; easing = 'circular' }) end;
+  ["<C-f>"] = function() neoscroll.ctrl_f({ duration = 450; easing = 'circular' }) end;
   -- When no value is passed the `easing` option supplied in `setup()` is used
-  ["<C-y>"] = function() neoscroll.scroll(-0.1, { move_cursor=false; time = 100 }) end;
-  ["<C-e>"] = function() neoscroll.scroll(0.1, { move_cursor=false; time = 100 }) end;
+  ["<C-y>"] = function() neoscroll.scroll(-0.1, { move_cursor=false; duration = 100 }) end;
+  ["<C-e>"] = function() neoscroll.scroll(0.1, { move_cursor=false; duration = 100 }) end;
 }
 local modes = { 'n', 'v', 'x' }
 for key, func in pairs(keymap) do
@@ -143,8 +147,8 @@ require('neoscroll').setup({
     post_hook = function(info) if info == "cursorline" then vim.wo.cursorline = true end end
 })
 local keymap = {
-  ["<C-u>"] = function() neoscroll.ctrl_u({ time = 250; info = 'cursorline' }) end;
-  ["<C-d>"] = function() neoscroll.ctrl_d({ time = 250; info = 'cursorline' }) end;
+  ["<C-u>"] = function() neoscroll.ctrl_u({ duration = 250; info = 'cursorline' }) end;
+  ["<C-d>"] = function() neoscroll.ctrl_d({ duration = 250; info = 'cursorline' }) end;
 }
 local modes = { 'n', 'v', 'x' }
 for key, func in pairs(keymap) do
