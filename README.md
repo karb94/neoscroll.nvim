@@ -36,22 +36,36 @@ You will need neovim 0.5 for this plugin to work. Install it using your favorite
 
 
 ## Options
-Setup function with all the options and their default values:
+Read `:help neoscroll-options` for a detailed description of all the options.
+
+`setup()` with all the options and their default values:
 ```lua
 require('neoscroll').setup({
-    -- All these keys will be mapped to their corresponding default scrolling animation
-    mappings = {'<C-u>', '<C-d>', '<C-b>', '<C-f>',
-                '<C-y>', '<C-e>', 'zt', 'zz', 'zb'},
-    hide_cursor = true,          -- Hide cursor while scrolling
-    stop_eof = true,             -- Stop at <EOF> when scrolling downwards
-    respect_scrolloff = false,   -- Stop scrolling when the cursor reaches the scrolloff margin of the file
-    cursor_scrolls_alone = true, -- The cursor will keep on scrolling even if the window cannot scroll further
-    easing = 'linear',       -- Default easing function
-    pre_hook = nil,              -- Function to run before the scrolling animation starts
-    post_hook = nil,             -- Function to run after the scrolling animation ends
-    performance_mode = false,    -- Disable "Performance Mode" on all buffers.
+  mappings = {                 -- Keys to be mapped to their corresponding default scrolling animation
+    '<C-u>', '<C-d>',
+    '<C-b>', '<C-f>',
+    '<C-y>', '<C-e>',
+    'zt', 'zz', 'zb',
+  },
+  hide_cursor = true,          -- Hide cursor while scrolling
+  stop_eof = true,             -- Stop at <EOF> when scrolling downwards
+  respect_scrolloff = false,   -- Stop scrolling when the cursor reaches the scrolloff margin of the file
+  cursor_scrolls_alone = true, -- The cursor will keep on scrolling even if the window cannot scroll further
+  easing = 'linear',           -- Default easing function
+  pre_hook = nil,              -- Function to run before the scrolling animation starts
+  post_hook = nil,             -- Function to run after the scrolling animation ends
+  performance_mode = false,    -- Disable "Performance Mode" on all buffers.
 })
 ```
+You can map a smaller set of default mappings:
+```lua
+require('neoscroll').setup({ mappings = {'<C-u>', '<C-d>', '<C-b>', '<C-f>'} })
+```
+Or you can disable all default mappings by passing an empty list:
+```lua
+require('neoscroll').setup({ mappings = {} })
+```
+The section below explains how to create your own custom mappings.
 
 
 ## Custom mappings
@@ -143,8 +157,8 @@ For example, if you want to hide the `cursorline` only for `<C-d>`/`<C-u>`
 scrolling animations you can do something like this:
 ```lua
 require('neoscroll').setup({
-    pre_hook = function(info) if info == "cursorline" then vim.wo.cursorline = false end end,
-    post_hook = function(info) if info == "cursorline" then vim.wo.cursorline = true end end
+  pre_hook = function(info) if info == "cursorline" then vim.wo.cursorline = false end end,
+  post_hook = function(info) if info == "cursorline" then vim.wo.cursorline = true end end
 })
 local keymap = {
   ["<C-u>"] = function() neoscroll.ctrl_u({ duration = 250; info = 'cursorline' }) end;
@@ -152,7 +166,7 @@ local keymap = {
 }
 local modes = { 'n', 'v', 'x' }
 for key, func in pairs(keymap) do
-    vim.keymap.set(modes, key, func)
+  vim.keymap.set(modes, key, func)
 end
 ```
 Keep in mind that the `info` variable is not restricted to a string. It can

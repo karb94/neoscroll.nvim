@@ -28,18 +28,32 @@ Add the `setup()` function in your init file: >lua
 FUNCTIONS                                                   *neoscroll-functions*
 
 neoscroll.setup({opts})                                       *neoscroll-setup()*
-    Overwrites the default options with the options in the table `opts`,
-    defines the default mappings and creates the necessary commands.
+    Overwrites the default options with the options in the `opts` table and
+    defines the default mappings. See |neoscroll-options| for a detailed
+    description of each option.
 
     Example with all the default options: >lua
         require('neoscroll').setup({
-            mappings = {'<C-u>', '<C-d>', '<C-b>',
-                '<C-f>', '<C-y>', '<C-e>', 'zt', 'zz', 'zb'},
-            hide_cursor = true,          
-            stop_eof = true,             
-            respect_scrolloff = false,   
-            cursor_scrolls_alone = true  
-            easing = 'linear'
+          mappings = {'<C-u>', '<C-d>', '<C-b>', '<C-f>',
+            '<C-y>', '<C-e>', 'zt', 'zz', 'zb'},
+          hide_cursor = true,
+          stop_eof = true,
+          respect_scrolloff = false,
+          cursor_scrolls_alone = true
+          easing = 'linear',
+          pre_hook = nil,
+          post_hook = nil,
+          performance_mode = false,
+        })
+<
+    Example disabling <C-y> and <C-e> default mappings: >lua
+        require('neoscroll').setup({
+          mappings = {'<C-u>', '<C-d>', '<C-b>', '<C-f>', 'zt', 'zz', 'zb'}
+        })
+<
+    Example disabling all default mappings: >lua
+        require('neoscroll').setup({
+          mappings = {}
         })
 <
 
@@ -57,18 +71,21 @@ neoscroll.scroll({lines}, {opts})                            *neoscroll.scroll()
               number). A negative number scrolls upwards (mnemonic: decrease
               line number).
       • {opts} (`table`) Scrolling behaviour:
-          • {move_cursor}: scroll and move the cursor simultaneously. When `true`
-              scrolling downwards will stop when the cursor line is the last
-              line of the file unless |stop_eof| is set to `true`.
-          • {duration}: duration of the scrolling animation in milliseconds.
-          • {easing}: name of the easing function to use for the scrolling
-              animation. If no name is passed the easing function defined in
-              `easing` option defined in |neoscroll-setup| will be used. Check
-              |neoscroll-easing-functions| for a list of supported easing
-              function names.
-          • `info`: optional parameter that will be passed to the |pre_hook| and
-            |post_hook| functions. Useful to differenciate different scrolling
-            animations or to pass additional information to the hook functions.
+          • {move_cursor} (`boolean`): scroll and move the cursor
+              simultaneously. When `true` scrolling downwards will stop when
+              the cursor line is the last line of the file unless |stop_eof|
+              is set to `true`.
+          • {duration} (`integer`): duration of the scrolling animation in
+              milliseconds.
+          • {easing} (`string`): name of the easing function to use for the
+              scrolling animation. If no name is passed the easing function
+              defined in `easing` option defined in |neoscroll-setup| will be
+              used. Check |neoscroll-easing-functions| for a list of supported
+              easing function names.
+          • {info} (`table`): optional parameter that will be passed to the
+              |pre_hook| and |post_hook| functions. Useful to differenciate
+              different scrolling animations or to pass additional information
+              to the hook functions.
 
     Examples: >lua
         local scroll = require('neoscroll').scroll
@@ -154,51 +171,54 @@ COMMANDS                                                     *neoscroll-commands
 ===============================================================================
 OPTIONS                                                       *neoscroll-options*
 
-|mappings| (default: `{'<C-u>', '<C-d>', '<C-b>', '<C-f>',`
-                    `'<C-y>', '<C-e>', 'zt', 'zz', 'zb'}`)
+|mappings| (
+    type: `table`,
+    default: `{'<C-u>', '<C-d>', '<C-b>', '<C-f>',`
+              `'<C-y>', '<C-e>', 'zt', 'zz', 'zb'}`
+)
     All the keys defined in this option will be mapped to their corresponding
     default scrolling animation. To no map any key pass an empty table (`{}`).
 
-|hide_cursor| (default: `true`)
+|hide_cursor| (type: `boolean`, default: `true`)
     If 'termguicolors' is set hide the cursor while scrolling.
 
-|stop_eof| (default: `true`)
+|stop_eof| (type: `boolean`, default: `true`)
     When `move_cursor` is `true` scrolling downwards will stop when the bottom
     line of the window is the last line of the file.
 
-|use_local_scrolloff| (default: `false`)
+|use_local_scrolloff| (type: `boolean`, default: `false`)
     Due to the Neovim #13964 bug if the local 'scrolloff' option is not
     explicitly set it doesn't inherit the global value of the option, instead
     it stores a garbage (random) value. Therefore Neoscroll cannot make
     assumptions about what scope to use so it will use the global scope by
     default unless this option is set to `true`.
 
-|respect_scrolloff| (default: `false`)
+|respect_scrolloff| (type: `boolean`, default: `false`)
     The cursor stops at the scrolloff margin. Try combining this option with
     either |stop_eof| or |cursor_scrolls_alone| (or both).
 
-|cursor_scrolls_alone| (default: `true`)
+|cursor_scrolls_alone| (type: `boolean`, default: `true`)
     The cursor will keep on scrolling even if the window cannot scroll
     further.
 
-|easing| (default: `nil`)
+|easing| (type: `string`, default: `nil`)
     Name of the easing function to use by default in all scrolling animamtions.
     `scroll()` that don't provide the optional `easing` argument will use this
     easing function. If set to `nil` (the default) no easing function will be
     used in the scrolling animation (constant scrolling speed).
 
-|pre_hook| (default: `nil`)
+|pre_hook| (type: `function`, default: `nil`)
     Function to run before the scrolling animation starts. The function will
     be called with the `info` parameter which can be optionally passed to
     `scroll()` (or any of the provided wrappers). This can be used to
     conditionally run different hooks for different types of scrolling
     animations.
 
-|post_hook| (default: `nil`)
+|post_hook| (type: `function`, default: `nil`)
     Equivalent to |pre_hook| but the function will run after the scrolling
     animation ends.
 
-|performance_mode| (default: `false`)
+|performance_mode| (type: `boolean`, default: `false`)
     Option to enable "Performance Mode" on all buffers.
 
 
