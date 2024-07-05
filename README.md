@@ -92,9 +92,9 @@ local keymap = {
   ["<C-f>"] = function() neoscroll.ctrl_f({ duration = 450 }) end;
   ["<C-y>"] = function() neoscroll.scroll(-0.1, { move_cursor=false; duration = 100 }) end;
   ["<C-e>"] = function() neoscroll.scroll(0.1, { move_cursor=false; duration = 100 }) end;
-  ["zt"]    = function() neoscroll.zt({ half_screen_duration = 250 }) end;
-  ["zz"]    = function() neoscroll.zz({ half_screen_duration = 250 }) end;
-  ["zb"]    = function() neoscroll.zb({ half_screen_duration = 250 }) end;
+  ["zt"]    = function() neoscroll.zt({ half_win_duration = 250 }) end;
+  ["zz"]    = function() neoscroll.zz({ half_win_duration = 250 }) end;
+  ["zb"]    = function() neoscroll.zb({ half_win_duration = 250 }) end;
   ["G"]     = function() neoscroll.G({ half_screen_duration = 250 }) end;
   ["gg"]    = function() neoscroll.gg({ half_screen_duration = 250 }) end;
 }
