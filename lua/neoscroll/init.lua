@@ -314,6 +314,13 @@ end
 ---@param easing string | nil Easing function to smooth the animation
 ---@param info table | nil
 function neoscroll.G(half_win_duration, easing, info, winid)
+  if type(half_win_duration) == "table" then
+    local zopts = half_win_duration
+    half_win_duration = zopts.half_win_duration
+    easing = zopts.easing
+    winid = zopts.winid
+    info = zopts.info or {}
+  end
   local lines = window.get_lines_below(vim.fn.line("w$"))
   local window_height = vim.fn.winheight(0)
   local duration = math.floor(half_win_duration * (math.abs(lines) / (window_height / 2)) + 0.5)
@@ -332,7 +339,14 @@ end
 ---@param half_win_duration number | Zopts Duration of the animation for a scroll of half a window
 ---@param easing_name string | nil Easing function to smooth the animation
 ---@param info table | nil
-function neoscroll.gg(half_win_duration, easing_name, info, winid)
+function neoscroll.gg(half_win_duration, easing, info, winid)
+  if type(half_win_duration) == "table" then
+    local zopts = half_win_duration
+    half_win_duration = zopts.half_win_duration
+    easing = zopts.easing
+    winid = zopts.winid
+    info = zopts.info
+  end
   local lines = window.get_lines_above(vim.fn.line("w0"))
   local window_height = vim.fn.winheight(winid)
   local cursor_win_line = vim.fn.winline()
@@ -341,7 +355,7 @@ function neoscroll.gg(half_win_duration, easing_name, info, winid)
   local opts = {
     move_cursor = true,
     duration = duration,
-    easing_name = easing_name,
+    easing = easing,
     winid = winid,
     info = info,
   }
