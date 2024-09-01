@@ -29,8 +29,19 @@ local function map_key(key, func, args)
   vim.api.nvim_set_keymap("x", key, cmd, opts)
 end
 
+config.mappings_warning = true
 -- Set mappings
 function config.set_mappings(custom_mappings)
+  if config.mappings_warning then
+    local old_sig = "scroll(lines, move_cursor, time[, easing])"
+    local new_sig = "scroll(lines, opts)"
+    local custom_mappings_url = [[https://github.com/karb94/neoscroll.nvim?tab=readme-ov-file#custom-mappings]]
+    local warning_msg = "Neoscroll: set_mappings() is deprecated. " ..
+    "Use `:help neoscroll-helper-functions` to construct custom mappings. " ..
+    "Examples are provided in the 'Custom mappings' section of the README."
+    vim.notify(warning_msg, vim.log.levels.WARN, {title = 'Neoscroll'})
+    config.mappings_warning = false
+  end
   for key, val in pairs(custom_mappings) do
     map_key(key, val[1], val[2])
   end

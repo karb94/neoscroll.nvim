@@ -3,6 +3,7 @@ describe("When BOF is reached", function()
   local time = 100
   local time_tol = require("tests.time_tol")
   local opts = { stop_eof = true, cursor_scrolls_alone = true }
+  local scroll_opts = {duration = time}
   neoscroll = require("neoscroll")
   vim.api.nvim_command("help help | only")
 
@@ -18,7 +19,7 @@ describe("When BOF is reached", function()
     opts.respect_scrolloff = false
     neoscroll.setup(opts)
     -- Scroll forwards
-    neoscroll.scroll(-(cursor_start - 1), true, time)
+    neoscroll.scroll(-(cursor_start - 1), scroll_opts)
     vim.wait(time + time_tol)
     cursor_finish = vim.fn.line(".")
     window_finish = vim.fn.line("w0")
@@ -32,7 +33,7 @@ describe("When BOF is reached", function()
     opts.respect_scrolloff = true
     neoscroll.setup(opts)
     -- Scroll forwards
-    neoscroll.scroll(-(cursor_start - 1), true, time)
+    neoscroll.scroll(-(cursor_start - 1), scroll_opts)
     vim.wait(time + time_tol)
     cursor_finish = vim.fn.line(".")
     window_finish = vim.fn.line("w0")
@@ -48,7 +49,7 @@ describe("When BOF is reached", function()
       opts.respect_scrolloff = true
       neoscroll.setup(opts)
       -- scroll forwards
-      neoscroll.scroll(-(cursor_start - 1), true, time)
+      neoscroll.scroll(-(cursor_start - 1), scroll_opts)
       vim.wait(time + time_tol)
       cursor_finish = vim.fn.line(".")
       window_finish = vim.fn.line("w0")
@@ -66,7 +67,7 @@ describe("When BOF is reached", function()
       opts.respect_scrolloff = true
       neoscroll.setup(opts)
       -- scroll forwards
-      neoscroll.scroll(-(cursor_start - 1), true, time)
+      neoscroll.scroll(-(cursor_start - 1), scroll_opts)
       vim.wait(time + time_tol)
       cursor_finish = vim.fn.line(".")
       window_finish = vim.fn.line("w0")
@@ -83,6 +84,7 @@ describe("When EOF is reached", function()
   local opts = { stop_eof = true, cursor_scrolls_alone = true }
   local last_line = vim.fn.line("$")
   local lines
+  local scroll_opts = {duration = time}
   vim.wo.scrolloff = -1
   neoscroll = require("neoscroll")
 
@@ -100,7 +102,7 @@ describe("When EOF is reached", function()
     opts.respect_scrolloff = false
     neoscroll.setup(opts)
     -- Scroll forwards
-    neoscroll.scroll(lines, true, time)
+    neoscroll.scroll(lines, scroll_opts)
     vim.wait(time + time_tol)
     cursor_finish = vim.fn.line(".")
     window_finish = vim.fn.line("w0")
@@ -114,7 +116,7 @@ describe("When EOF is reached", function()
     opts.respect_scrolloff = true
     neoscroll.setup(opts)
     -- Scroll forwards
-    neoscroll.scroll(lines, true, time)
+    neoscroll.scroll(lines, scroll_opts)
     vim.wait(time + time_tol)
     cursor_finish = vim.fn.line(".")
     window_finish = vim.fn.line("w0")
@@ -130,7 +132,7 @@ describe("When EOF is reached", function()
       opts.respect_scrolloff = true
       neoscroll.setup(opts)
       -- Scroll forwards
-      neoscroll.scroll(lines, true, time)
+      neoscroll.scroll(lines, scroll_opts)
       vim.wait(time + time_tol)
       cursor_finish = vim.fn.line(".")
       window_finish = vim.fn.line("w0")
@@ -148,7 +150,7 @@ describe("When EOF is reached", function()
       opts.respect_scrolloff = true
       neoscroll.setup(opts)
       -- Scroll forwards
-      neoscroll.scroll(lines, true, time)
+      neoscroll.scroll(lines, scroll_opts)
       vim.wait(time + time_tol)
       cursor_finish = vim.fn.line(".")
       window_finish = vim.fn.line("w0")
@@ -164,6 +166,7 @@ describe("When beyond EOF", function()
   local time_tol = 5
   local opts = { stop_eof = false, cursor_scrolls_alone = true }
   local lines = vim.fn.winheight(0)
+  local scroll_opts = {duration = time}
   vim.wo.scrolloff = -1
   neoscroll = require("neoscroll")
   local last_line = vim.fn.line("$")
@@ -181,7 +184,7 @@ describe("When beyond EOF", function()
     opts.respect_scrolloff = false
     neoscroll.setup(opts)
     -- Scroll forwards
-    neoscroll.scroll(lines, true, time)
+    neoscroll.scroll(lines, scroll_opts)
     vim.wait(time + time_tol)
     cursor_finish = vim.fn.line(".")
     window_finish = vim.fn.line("w0")
@@ -195,7 +198,7 @@ describe("When beyond EOF", function()
     opts.respect_scrolloff = true
     neoscroll.setup(opts)
     -- Scroll forwards
-    neoscroll.scroll(lines, true, time)
+    neoscroll.scroll(lines, scroll_opts)
     vim.wait(time + time_tol)
     cursor_finish = vim.fn.line(".")
     window_finish = vim.fn.line("w0")
@@ -211,7 +214,7 @@ describe("When beyond EOF", function()
       opts.respect_scrolloff = true
       neoscroll.setup(opts)
       -- Scroll forwards
-      neoscroll.scroll(lines, true, time)
+      neoscroll.scroll(lines, scroll_opts)
       vim.wait(time + time_tol)
       cursor_finish = vim.fn.line(".")
       window_finish = vim.fn.line("w0")
@@ -229,7 +232,7 @@ describe("When beyond EOF", function()
       opts.respect_scrolloff = true
       neoscroll.setup(opts)
       -- Scroll forwards
-      neoscroll.scroll(lines, true, time)
+      neoscroll.scroll(lines, scroll_opts)
       vim.wait(time + time_tol)
       cursor_finish = vim.fn.line(".")
       window_finish = vim.fn.line("w0")

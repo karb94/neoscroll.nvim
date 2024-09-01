@@ -5,11 +5,18 @@ local scroll = require("neoscroll.scroll")
 
 -- Highlight group to hide the cursor
 local hl_callback = function()
-  vim.api.nvim_set_hl(0, "NeoscrollHiddenCursor", { reverse = true, blend = 100 })
+  vim.api.nvim_set_hl(
+    0,
+    "NeoscrollHiddenCursor",
+    { reverse = true, blend = 100 }
+  )
 end
 hl_callback()
 local cursor_group = vim.api.nvim_create_augroup("NeoscrollHiddenCursor", {})
-vim.api.nvim_create_autocmd({ "ColorScheme" }, { group = cursor_group, callback = hl_callback })
+vim.api.nvim_create_autocmd(
+  { "ColorScheme" },
+  { group = cursor_group, callback = hl_callback }
+)
 
 -- Stop scrolling when changing window focus
 local teardown_group = vim.api.nvim_create_augroup("NeoscrollTearDown", {})
@@ -78,6 +85,7 @@ local function make_scroll_callback()
 end
 
 local neoscroll = {}
+neoscroll.signature_warning = true
 
 ---@param lines number
 ---@param move_cursor boolean | nil | table Scroll the window and the cursor simultaneously
@@ -90,7 +98,15 @@ function neoscroll.scroll(lines, move_cursor, duration, easing, info, winid)
   if type(move_cursor) == "table" then
     opts = move_cursor
   else
-    -- vim.notify("Neoscroll: deprecation warning", vim.log.levels.WARN, {title = 'Neoscroll'})
+    if neoscroll.signature_warning then
+      local old_sig = "scroll(lines, move_cursor, time[, easing])"
+      local new_sig = "scroll(lines, opts)"
+      local warning_msg = "Neoscroll: the function signature " ..
+        old_sig .. " is deprecated in favour of the new " ..
+      new_sig .. " signature. Run `help neoscroll.scroll()` for more info"
+      vim.notify(warning_msg, vim.log.levels.WARN, {title = 'Neoscroll'})
+      neoscroll.signature_warning = false
+    end
     opts = {
       move_cursor = move_cursor,
       duration = duration,
@@ -118,6 +134,7 @@ default_scroll_opts = {
 ---@param lines number Number of lines to scroll or fraction of window to scroll
 ---@param opts ScrollOpts Scroll options
 function neoscroll.new_scroll(lines, opts)
+  -- print(vim.inspect(opts))
   scroll.opts = vim.tbl_deep_extend("force", default_scroll_opts, opts or {})
   -- If lines is a fraction of the window transform it to lines
   if is_float(lines) then

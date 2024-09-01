@@ -101,10 +101,15 @@ neoscroll.scroll({lines}, {opts})                            *neoscroll.scroll()
         scroll(-20, {move_cursor=true, duration=400, easing="sine"})
 <
 
-                                                           *neoscroll.ctrl_u()*
-                                                           *neoscroll.ctrl_d()*
-                                                           *neoscroll.ctrl_b()*
-                                                           *neoscroll.ctrl_f()*
+HELPER FUNCTIONS                                     *neoscroll-helper-functions*
+
+The following functions are |neoscroll.scroll()| wrapper functions that
+emulate (neo)vim scrolling motions.
+
+                                                             *neoscroll.ctrl_u()*
+                                                             *neoscroll.ctrl_d()*
+                                                             *neoscroll.ctrl_b()*
+                                                             *neoscroll.ctrl_f()*
 neoscroll.{ctrl_u, ctrl_d, ctrl_b, ctrl_f}({opts})
     |neoscroll.scroll()| wrappers that injects the number of `lines`
     corresponding to the <C-u>, <C-d>, <C-b> and <C-f> respectively.
@@ -124,9 +129,9 @@ neoscroll.{ctrl_u, ctrl_d, ctrl_b, ctrl_f}({opts})
             animations or to pass additional information to the hook functions.
 
 
-                                                               *neoscroll.zt()*
-                                                               *neoscroll.zz()*
-                                                               *neoscroll.zb()*
+                                                                 *neoscroll.zt()*
+                                                                 *neoscroll.zz()*
+                                                                 *neoscroll.zb()*
 neoscroll.{zt,zz,zb}({half_win_duration}, {opts}[, {easing}, {info}])
     `scroll()` wrapper functions to mimic |zt|, |zz| and |zb| scrolling
     commands.

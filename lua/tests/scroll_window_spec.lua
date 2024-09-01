@@ -6,9 +6,10 @@ local function scroll_win_cursor()
   local cursor_start = vim.fn.line(".")
   local window_start = vim.fn.line("w0")
   local cursor_finish, window_finish
+  local scroll_opts = {move_cursor = false, duration = time}
 
   -- Scroll forwards
-  neoscroll.scroll(lines, false, time)
+  neoscroll.scroll(lines, scroll_opts)
   vim.wait(time + time_tol)
   cursor_finish = vim.fn.line(".")
   window_finish = vim.fn.line("w0")
@@ -16,7 +17,7 @@ local function scroll_win_cursor()
   assert.equals(window_start + lines, window_finish)
 
   -- Scroll backwards
-  neoscroll.scroll(-lines, false, time)
+  neoscroll.scroll(-lines, scroll_opts)
   vim.wait(time + time_tol)
   cursor_finish = vim.fn.line(".")
   window_finish = vim.fn.line("w0")

@@ -79,7 +79,8 @@ You can create your own scrolling mappings using the following lua functions:
 * `zz(half_win_duration, opts)`
 * `zb(half_win_duration, opts)`
 
-Read `:help neoscroll-functions` for more details.
+Read `:help neoscroll.scroll()` and `:help neoscroll-helper-functions` for more
+details.
 
 You can use the following syntactic sugar in your init.lua to define lua
 function mappings in normal, visual and select modes:
