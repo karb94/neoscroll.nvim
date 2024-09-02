@@ -238,6 +238,7 @@ end
 ---@field info table | nil
 ---@field winid integer | nil ID of the window to scroll
 
+neoscroll.zt_warning = true
 ---zt emulation
 ---@param half_win_duration number | Zopts Duration of the animation for a scroll of half a window
 ---@param easing string | nil Easing function to smooth the animation
@@ -249,6 +250,14 @@ function neoscroll.zt(half_win_duration, easing, info, winid)
     easing = zopts.easing
     winid = zopts.winid
     info = zopts.info
+  elseif neoscroll.zt_warning then
+    local old_sig = "zt(half_win_duration, easing, info, winid)"
+    local new_sig = "zt(opts)"
+    local warning_msg = "Neoscroll: the function signature " ..
+    old_sig .. " is deprecated in favour of the new " ..
+    new_sig .. " signature. Run `help neoscroll.zt()` for more info"
+    vim.notify(warning_msg, vim.log.levels.WARN, {title = 'Neoscroll'})
+    neoscroll.zt_warning = false
   end
   local window_height = vim.fn.winheight(0)
   local win_lines_above_cursor = vim.fn.winline() - 1
@@ -268,6 +277,7 @@ function neoscroll.zt(half_win_duration, easing, info, winid)
   neoscroll.scroll(lines, opts)
 end
 
+neoscroll.zz_warning = true
 ---zz emulation
 ---@param half_win_duration number | Zopts Duration of the animation for a scroll of half a window
 ---@param easing string | nil Easing function to smooth the animation
@@ -279,6 +289,14 @@ function neoscroll.zz(half_win_duration, easing, info, winid)
     easing = zopts.easing
     winid = zopts.winid
     info = zopts.info
+  elseif neoscroll.zz_warning then
+    local old_sig = "zz(half_win_duration, easing, info, winid)"
+    local new_sig = "zz(opts)"
+    local warning_msg = "Neoscroll: the function signature " ..
+    old_sig .. " is deprecated in favour of the new " ..
+    new_sig .. " signature. Run `help neoscroll.zz()` for more info"
+    vim.notify(warning_msg, vim.log.levels.WARN, {title = 'Neoscroll'})
+    neoscroll.zz_warning = false
   end
   local window_height = vim.fn.winheight(0)
   local lines = vim.fn.winline() - math.ceil(window_height / 2)
@@ -296,6 +314,7 @@ function neoscroll.zz(half_win_duration, easing, info, winid)
   neoscroll.scroll(lines, opts)
 end
 
+neoscroll.zb_warning = true
 ---zb emulation
 ---@param half_win_duration number | Zopts Duration of the animation for a scroll of half a window
 ---@param easing string | nil Easing function to smooth the animation
@@ -307,6 +326,14 @@ function neoscroll.zb(half_win_duration, easing, info, winid)
     easing = zopts.easing
     winid = zopts.winid
     info = zopts.info
+  elseif neoscroll.zb_warning then
+    local old_sig = "zb(half_win_duration, easing, info, winid)"
+    local new_sig = "zb(opts)"
+    local warning_msg = "Neoscroll: the function signature " ..
+    old_sig .. " is deprecated in favour of the new " ..
+    new_sig .. " signature. Run `help neoscroll.zb()` for more info"
+    vim.notify(warning_msg, vim.log.levels.WARN, {title = 'Neoscroll'})
+    neoscroll.zb_warning = false
   end
   local window_height = vim.fn.winheight(0)
   local lines_below_cursor = window_height - vim.fn.winline()

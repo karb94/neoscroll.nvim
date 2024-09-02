@@ -63,29 +63,34 @@ neoscroll.scroll({lines}, {opts})                            *neoscroll.scroll()
     animation.
 
     Parameters: ~
-      • {lines} (`integer|float`)
+      • {lines} (type: `integer|float`)
           - If `integer`: number of lines to scroll.
           - If `float`: number of "windows" to scroll (e.g. 0.1 = 10% of the
               current window's height.
           - A positive number scrolls downwards (mnemonic: increase line
               number). A negative number scrolls upwards (mnemonic: decrease
               line number).
-      • {opts} (`table`) Scrolling behaviour:
-          • {move_cursor} (`boolean`): scroll and move the cursor
-              simultaneously. When `true` scrolling downwards will stop when
-              the cursor line is the last line of the file unless |stop_eof|
-              is set to `true`.
-          • {duration} (`integer`): duration of the scrolling animation in
-              milliseconds.
-          • {easing} (`string`): name of the easing function to use for the
-              scrolling animation. If no name is passed the easing function
-              defined in `easing` option defined in |neoscroll-setup| will be
-              used. Check |neoscroll-easing-functions| for a list of supported
-              easing function names.
-          • {info} (`table`): optional parameter that will be passed to the
-              |pre_hook| and |post_hook| functions. Useful to differenciate
-              different scrolling animations or to pass additional information
-              to the hook functions.
+      • {opts} (type: `table`)
+          Scrolling behaviour options.
+          • {move_cursor} (type: `boolean` default: `true`)
+              Scroll and move the cursor simultaneously. When `true` scrolling
+              downwards will stop when the cursor line is the last line of the
+              file unless |stop_eof| is set to `true`.
+          • {duration} (type: `integer`)
+              Duration of the scrolling animation in milliseconds.
+          • {easing} (type: `string`)
+              name of the easing function to use for the scrolling animation.
+              If no name is passed the easing function defined in `easing`
+              option defined in |neoscroll-setup| will be used. Check
+              |neoscroll-easing-functions| for a list of supported easing
+              function names.
+          • {info} (type: `table`)
+              Optional parameter that will be passed to the |pre_hook| and
+              |post_hook| functions. Useful to differenciate different
+              scrolling animations or to pass additional information to the
+              hook functions.
+          • {winid} (type: `integer`)
+              Identifier of the window to scroll.
 
     Examples: >lua
         local scroll = require('neoscroll').scroll
@@ -111,49 +116,62 @@ emulate (neo)vim scrolling motions.
                                                              *neoscroll.ctrl_b()*
                                                              *neoscroll.ctrl_f()*
 neoscroll.{ctrl_u, ctrl_d, ctrl_b, ctrl_f}({opts})
-    |neoscroll.scroll()| wrappers that injects the number of `lines`
+    |neoscroll.scroll()| wrapper functions that injects the number of `lines`
     corresponding to the <C-u>, <C-d>, <C-b> and <C-f> respectively.
     Parameters: ~
-      • {opts} (`table`) Scrolling behaviour:
-          • {move_cursor}: scroll and move the cursor simultaneously. When `true`
-              scrolling downwards will stop when the cursor line is the last
-              line of the file unless |stop_eof| is set to `true`.
-          • {duration}: duration of the scrolling animation in milliseconds.
-          • {easing}: name of the easing function to use for the scrolling
-              animation. If no name is passed the easing function defined in
-              `easing` option defined in |neoscroll-setup| will be used. Check
+      • {opts} (type: `table`)
+          Scrolling behaviour options.
+          • {move_cursor} (type: `boolean` default: `true`)
+              Scroll and move the cursor simultaneously. When `true` scrolling
+              downwards will stop when the cursor line is the last line of the
+              file unless |stop_eof| is set to `true`.
+          • {duration} (type: `integer`)
+              Duration of the scrolling animation in milliseconds.
+          • {easing} (type: `string`)
+              name of the easing function to use for the scrolling animation.
+              If no name is passed the easing function defined in `easing`
+              option defined in |neoscroll-setup| will be used. Check
               |neoscroll-easing-functions| for a list of supported easing
               function names.
-          • `info`: optional parameter that will be passed to the |pre_hook| and
-            |post_hook| functions. Useful to differenciate different scrolling
-            animations or to pass additional information to the hook functions.
+          • {info} (type: `table`)
+              Optional parameter that will be passed to the |pre_hook| and
+              |post_hook| functions. Useful to differenciate different
+              scrolling animations or to pass additional information to the
+              hook functions.
+          • {winid} (type: `integer`)
+              Identifier of the window to scroll.
 
 
                                                                  *neoscroll.zt()*
                                                                  *neoscroll.zz()*
                                                                  *neoscroll.zb()*
-neoscroll.{zt,zz,zb}({half_win_duration}, {opts}[, {easing}, {info}])
-    `scroll()` wrapper functions to mimic |zt|, |zz| and |zb| scrolling
+neoscroll.{zt,zz,zb}({opts})
+    |neoscroll.scroll()| wrapper functions to mimic |zt|, |zz| and |zb| scrolling
     commands.
     Parameters: ~
-      • {half_win_duration} (`integer|float`)
-          The `half_win_duration` argument is the time it would take to scroll
-          half of the window. The `time` argument passed to the `scroll()` function
-          is calculated as: >
-              half_screen_time * (lines_to_scroll/(window_lines/2))
-<          where `lines_to_scroll` is the number of lines to be scrolled and
-          `window_lines` is the number of lines of the window. This ensures that
-          when there are very few lines to scroll the duration of the scrolling
-          animation is proportionately shorter.
-      • {opts} (`table`) Scrolling behaviour:
+      • {opts} (type: `table`)
+          Scrolling behaviour options.
+          • {half_win_duration} (`integer|float`)
+              The `half_win_duration` argument is the time it would take to
+              scroll half of the window. The `time` argument passed to the
+              `scroll()` function is calculated as: >
+                  half_screen_time * (lines_to_scroll/(window_lines/2))
+<              where `lines_to_scroll` is the number of lines to be scrolled and
+              `window_lines` is the number of lines of the window. This ensures
+              that when there are very few lines to scroll the duration of the
+              scrolling animation is proportionately shorter.
           • {easing}: name of the easing function to use for the scrolling
               animation. If no name is passed the easing function defined in
               `easing` option defined in |neoscroll-setup| will be used. Check
               |neoscroll-easing-functions| for a list of supported easing
               function names.
-          • `info`: optional parameter that will be passed to the |pre_hook| and
-            |post_hook| functions. Useful to differenciate different scrolling
-            animations or to pass additional information to the hook functions.
+          • {info} (type: `table`)
+              Optional parameter that will be passed to the |pre_hook| and
+              |post_hook| functions. Useful to differenciate different
+              scrolling animations or to pass additional information to the
+              hook functions.
+          • {winid} (type: `integer`)
+              Identifier of the window to scroll.
 
 
 ===============================================================================

@@ -72,6 +72,7 @@ function scroll:set_up()
   if config.hide_cursor and self.opts.move_cursor then
     self:hide_cursor()
   end
+  -- Disable events
   -- Performance mode
   local performance_mode = vim.b.neoscroll_performance_mode or vim.g.neoscroll_performance_mode
   if performance_mode and self.opts.move_cursor then
