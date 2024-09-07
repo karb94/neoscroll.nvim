@@ -44,6 +44,7 @@ neoscroll.setup({opts})                                       *neoscroll-setup()
           pre_hook = nil,
           post_hook = nil,
           performance_mode = false,
+          ignored_events = {'WinScrolled', 'CursorMoved'},
         })
 <
     Example disabling <C-y> and <C-e> default mappings: >lua
@@ -242,8 +243,13 @@ OPTIONS                                                       *neoscroll-options
     animation ends.
 
 |performance_mode| (type: `boolean`, default: `false`)
-    Option to enable "Performance Mode" on all buffers.
+    Enables "Performance Mode" on all buffers.
 
+|ignored_events| (type: `table`, default: `{'WinScrolled', 'CursorMoved'}`)
+    Neoscroll ignores the events in this list during the scrolling animation.
+    Pass an empty table (`{}`) if you do not want any events to be ignored.
+    Note: `WinScrolled` and `CursorMoved` will still trigger a single time at
+    the end of the scrolling animation.
 
 ===============================================================================
 EASING FUNCTIONS                                     *neoscroll-easing-functions*

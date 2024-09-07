@@ -8,6 +8,7 @@ config.default_options = {
   cursor_scrolls_alone = true,
   performance_mode = false,
   easing = "linear",
+  ignored_events = {'WinScrolled', 'CursorMoved'},
 }
 
 config.opts = vim.deepcopy(config.default_options)

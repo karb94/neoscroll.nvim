@@ -73,6 +73,9 @@ function scroll:set_up()
     self:hide_cursor()
   end
   -- Disable events
+  if next(config.ignored_events) ~= nil then
+    vim.opt.eventignore:append(config.ignored_events)
+  end
   -- Performance mode
   local performance_mode = vim.b.neoscroll_performance_mode or vim.g.neoscroll_performance_mode
   if performance_mode and self.opts.move_cursor then
@@ -89,6 +92,7 @@ end
 function scroll:tear_down()
   self.timer:stop()
 
+  -- Unhide cursor
   if config.hide_cursor == true and self.opts.move_cursor then
     self:unhide_cursor()
   end
@@ -102,6 +106,10 @@ function scroll:tear_down()
   end
   if config.post_hook ~= nil then
     config.post_hook(self.opts.info)
+  end
+  -- Reenable events
+  if next(config.ignored_events) ~= nil then
+    vim.opt.eventignore:remove(config.ignored_events)
   end
 
   self.relative_line = 0

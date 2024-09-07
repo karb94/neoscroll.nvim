@@ -56,6 +56,9 @@ require('neoscroll').setup({
   pre_hook = nil,              -- Function to run before the scrolling animation starts
   post_hook = nil,             -- Function to run after the scrolling animation ends
   performance_mode = false,    -- Disable "Performance Mode" on all buffers.
+  ignored_events = {           -- Events ignored while scrolling
+      'WinScrolled', 'CursorMoved'
+  },
 })
 ```
 You can map a smaller set of default mappings:

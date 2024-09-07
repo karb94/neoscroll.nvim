@@ -3,6 +3,7 @@ local window = require("neoscroll.window")
 local logic = require("neoscroll.logic")
 local scroll = require("neoscroll.scroll")
 
+
 -- Highlight group to hide the cursor
 local hl_callback = function()
   vim.api.nvim_set_hl(
