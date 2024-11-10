@@ -6,6 +6,7 @@ config.default_options = {
   stop_eof = true,
   respect_scrolloff = false,
   cursor_scrolls_alone = true,
+  duration_multiplier = 1.0,
   performance_mode = false,
   easing = "linear",
   ignored_events = {'WinScrolled', 'CursorMoved'},

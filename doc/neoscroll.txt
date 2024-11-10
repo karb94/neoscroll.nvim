@@ -225,6 +225,10 @@ OPTIONS                                                       *neoscroll-options
     The cursor will keep on scrolling even if the window cannot scroll
     further.
 
+|duration_multiplier| (type: `float`, default: `1.0`)
+  The duration of all animations will be multiplied by this factor.
+  Increasing/decreasing this value results in slower/faster animations.
+
 |easing| (type: `string`, default: `nil`)
     Name of the easing function to use by default in all scrolling animamtions.
     `scroll()` that don't provide the optional `easing` argument will use this

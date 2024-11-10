@@ -136,6 +136,8 @@ default_scroll_opts = {
 ---@param opts ScrollOpts Scroll options
 function neoscroll.new_scroll(lines, opts)
   scroll.opts = vim.tbl_deep_extend("force", default_scroll_opts, opts or {})
+  -- Modify animation duration globally
+  scroll.opts.duration = config.duration_multiplier * scroll.opts.duration
   -- If lines is a fraction of the window transform it to lines
   if is_float(lines) then
     lines = get_lines_from_win_fraction(lines, scroll.opts.winid)
