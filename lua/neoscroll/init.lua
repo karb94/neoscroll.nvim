@@ -135,7 +135,6 @@ default_scroll_opts = {
 ---@param lines number Number of lines to scroll or fraction of window to scroll
 ---@param opts ScrollOpts Scroll options
 function neoscroll.new_scroll(lines, opts)
-  -- print(vim.inspect(opts))
   scroll.opts = vim.tbl_deep_extend("force", default_scroll_opts, opts or {})
   -- If lines is a fraction of the window transform it to lines
   if is_float(lines) then
@@ -407,7 +406,7 @@ function neoscroll.gg(half_win_duration, easing, info, winid)
   neoscroll.scroll(lines, opts)
 end
 
-neoscroll.scroll_fn = function(self, direction)
+neoscroll.telescope_scroll_fn = function(self, direction)
   if not self.state then
     return
   end
