@@ -156,35 +156,45 @@ function scroll:scroll_one_line(lines_to_scroll, scroll_window, scroll_cursor)
   if lines_to_scroll == 0 then
     error("lines_to_scroll cannot be zero")
   end
-  local winline_before = vim.fn.winline()
+  local initial_winline = vim.api.nvim_win_call(self.opts.winid, vim.fn.winline)
   local initial_cursor_line = vim.api.nvim_win_get_cursor(self.opts.winid)[1]
   local cursor_scroll_cmd = lines_to_scroll > 0 and "gj" or "gk"
   local cursor_scroll_args = scroll_cursor and cursor_scroll_cmd or ""
   local window_scroll_cmd = lines_to_scroll > 0 and ctrl_e or ctrl_y
   local window_scroll_args = scroll_window and window_scroll_cmd or ""
   local scroll_args = window_scroll_args .. cursor_scroll_args
-  local success, _ = pcall(create_scroll_func(scroll_args, self.opts.winid)) ---@diagnostic disable-line
+  local one_line_scroll = create_scroll_func(scroll_args, self.opts.winid)
+  local success, _ = pcall(one_line_scroll) ---@diagnostic disable-line
   if not success then
     return false
   end
   local scrolled_lines = lines_to_scroll > 0 and 1 or -1
-  -- Correct for wrapped lines
-  local lines_behind = vim.fn.winline() - self.initial_cursor_win_line
-  if lines_to_scroll > 0 then
-    lines_behind = -lines_behind
-  end
-  if scroll_cursor and scroll_window and lines_behind > 0 then
-    local cursor_args = string.rep(cursor_scroll_cmd, lines_behind)
-    local success, _ = pcall(create_scroll_func(cursor_args, self.opts.winid)) ---@diagnostic disable-line
-    if not success then
-      return false
+
+  if scroll_cursor and scroll_window then
+    -- Correct for wrapped lines
+    local winline = vim.api.nvim_win_call(self.opts.winid, vim.fn.winline)
+    local lines_behind = winline - self.initial_cursor_win_line
+    if lines_to_scroll > 0 then
+      lines_behind = -lines_behind
+    end
+    if lines_behind > 0 then
+      local cursor_args = string.rep(cursor_scroll_cmd, lines_behind)
+      local catchup_scroll = create_scroll_func(cursor_args, self.opts.winid)
+      local success, _ = pcall(catchup_scroll) ---@diagnostic disable-line
+      if not success then
+        return false
+      end
     end
   end
+
   -- If the cursor is still on the same line we can use the change in window line
   -- to calculate the lines we have scrolled more accurately (not affected by wrapped lines)
-  if initial_cursor_line == vim.api.nvim_win_get_cursor(self.opts.winid)[1] then
-    scrolled_lines = winline_before - vim.fn.winline()
+  local cursor_line = vim.api.nvim_win_get_cursor(self.opts.winid)[1]
+  if cursor_line == initial_cursor_line  then
+    local final_winline = vim.api.nvim_win_call(self.opts.winid, vim.fn.winline)
+    scrolled_lines = initial_winline - final_winline
   end
+
   -- If we have past our target line (e.g. when forced by  wrapped lines) set lines_to_scroll
   -- to 1 to trigger scroll:tear_down(). Otherwise it will start scrolling backwards and
   -- potentially run into an infinite loop
