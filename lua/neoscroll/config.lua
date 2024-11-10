@@ -9,6 +9,7 @@ config.default_options = {
   performance_mode = false,
   easing = "linear",
   ignored_events = {'WinScrolled', 'CursorMoved'},
+  telescope_scroll_opts = { duration = 250 },
 }
 
 config.opts = vim.deepcopy(config.default_options)

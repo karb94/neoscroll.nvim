@@ -407,6 +407,18 @@ function neoscroll.gg(half_win_duration, easing, info, winid)
   neoscroll.scroll(lines, opts)
 end
 
+neoscroll.scroll_fn = function(self, direction)
+  if not self.state then
+    return
+  end
+  local opts = {}
+  for k, v in pairs(config.telescope_scroll_opts) do
+    opts[k] = v
+  end
+  opts.winid = self.state.winid
+  neoscroll.scroll(direction, opts)
+end
+
 -- stylua: ignore start
 local function_mappings = {
   ["<C-u>"] = function() neoscroll.ctrl_u({duration = 250}) end;
