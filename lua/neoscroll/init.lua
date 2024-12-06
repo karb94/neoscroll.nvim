@@ -468,6 +468,8 @@ function neoscroll.setup(custom_opts)
   vim.cmd("command! NeoscrollEnableBufferPM let b:neoscroll_performance_mode = v:true")
   vim.cmd("command! NeoscrollDisableBufferPM let b:neoscroll_performance_mode = v:false")
   vim.cmd("command! NeoscrollEnableGlobalPM let g:neoscroll_performance_mode = v:true")
+  vim.cmd("command! NeoscrollDisableGlobalePM let g:neoscroll_performance_mode = v:false")
+  ---@type deprecated
   vim.cmd("command! NeoscrollDisablGlobalePM let g:neoscroll_performance_mode = v:false")
   if config.performance_mode then
     vim.g.neoscroll_performance_mode = true
