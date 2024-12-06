@@ -29,9 +29,7 @@ You will need neovim 0.5 for this plugin to work. Install it using your favorite
     ```lua
     return {
       "karb94/neoscroll.nvim",
-      config = function ()
-        require('neoscroll').setup({})
-      end
+      opts = {},
     }
     ```
 
