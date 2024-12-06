@@ -188,7 +188,7 @@ COMMANDS                                                     *neoscroll-commands
 |NeoscrollEnableBufferPM| / |NeoscrollDisableBufferPM|
     Enable/disable "Performance Mode" for the current buffer.
 
-|NeoscrollEnableGlobalPM| / |NeoscrollDisablGlobalePM|
+|NeoscrollEnableGlobalPM| / |NeoscrollDisableGlobalePM|
     Enable/disable "Performance Mode" for all buffers.
 
 
