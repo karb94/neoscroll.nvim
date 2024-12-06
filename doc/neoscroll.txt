@@ -87,7 +87,7 @@ neoscroll.scroll({lines}, {opts})                            *neoscroll.scroll()
               function names.
           • {info} (type: `table`)
               Optional parameter that will be passed to the |pre_hook| and
-              |post_hook| functions. Useful to differenciate different
+              |post_hook| functions. Useful to differentiate different
               scrolling animations or to pass additional information to the
               hook functions.
           • {winid} (type: `integer`)
@@ -136,7 +136,7 @@ neoscroll.{ctrl_u, ctrl_d, ctrl_b, ctrl_f}({opts})
               function names.
           • {info} (type: `table`)
               Optional parameter that will be passed to the |pre_hook| and
-              |post_hook| functions. Useful to differenciate different
+              |post_hook| functions. Useful to differentiate different
               scrolling animations or to pass additional information to the
               hook functions.
           • {winid} (type: `integer`)
@@ -168,7 +168,7 @@ neoscroll.{zt,zz,zb}({opts})
               function names.
           • {info} (type: `table`)
               Optional parameter that will be passed to the |pre_hook| and
-              |post_hook| functions. Useful to differenciate different
+              |post_hook| functions. Useful to differentiate different
               scrolling animations or to pass additional information to the
               hook functions.
           • {winid} (type: `integer`)
