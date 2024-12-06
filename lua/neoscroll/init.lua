@@ -90,7 +90,7 @@ neoscroll.signature_warning = true
 
 ---@param lines number
 ---@param move_cursor boolean | nil | table Scroll the window and the cursor simultaneously
----@param duration number | nil Duration of the animation in miliseconds
+---@param duration number | nil Duration of the animation in milliseconds
 ---@param easing string | nil Easing function to smooth the animation
 ---@param info table | nil
 ---@param winid integer | nil ID of the window to scroll
@@ -121,7 +121,7 @@ end
 
 ---@class ScrollOpts
 ---@field move_cursor boolean | nil Scroll the window and the cursor simultaneously
----@field duration number | nil Duration of the animation in miliseconds
+---@field duration number | nil Duration of the animation in milliseconds
 ---@field easing string | nil Easing function to smooth the animation
 ---@field info table | nil
 ---@field winid integer | nil ID of the window to scroll
@@ -235,7 +235,7 @@ function neoscroll.ctrl_f(opts)
 end
 
 ---@class Zopts
----@field half_win_duration number Duration of the animation in miliseconds
+---@field half_win_duration number Duration of the animation in milliseconds
 ---@field easing string | nil Easing function to smooth the animation
 ---@field info table | nil
 ---@field winid integer | nil ID of the window to scroll
