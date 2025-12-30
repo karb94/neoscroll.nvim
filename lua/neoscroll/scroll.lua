@@ -79,8 +79,12 @@ function scroll:set_up()
   -- Performance mode
   local performance_mode = vim.b.neoscroll_performance_mode or vim.g.neoscroll_performance_mode
   if performance_mode and self.opts.move_cursor then
+    -- Disable treesitter highlighting
     if vim.g.loaded_nvim_treesitter then
-      vim.cmd("TSBufDisable highlight")
+      local ok = pcall(vim.treesitter.stop)
+      if not ok then
+        vim.cmd("TSBufDisable highlight")
+      end
     end
     vim.bo.syntax = "OFF"
   end
@@ -101,7 +105,10 @@ function scroll:tear_down()
   if performance_mode and self.opts.move_cursor then
     vim.bo.syntax = "ON"
     if vim.g.loaded_nvim_treesitter then
-      vim.cmd("TSBufEnable highlight")
+      local ok = pcall(vim.treesitter.start)
+      if not ok then
+        vim.cmd("TSBufEnable highlight")
+      end
     end
   end
   if config.post_hook ~= nil then
